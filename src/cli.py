@@ -7,7 +7,7 @@ import corrections
 import validate as validate_mod
 import worklist
 from validate import Report
-from exporters.registry import EXTENSIONS, make_exporter
+from exporters.registry import EXTENSIONS, make_exporter, output_path
 from sources.registry import make_source
 
 app = typer.Typer(help="Ferramenta para gerar Bíblias em português a partir de uma fonte canônica.")
@@ -41,7 +41,7 @@ def build(code: str, format: str = "zefania", out: Path = Path("dist")) -> None:
             raise typer.BadParameter(f"Formato desconhecido: {fmt}")
     bible = canon.load_bible(code, CANON_DIR)
     for fmt in formats:
-        make_exporter(fmt).export(bible, out / f"{code}.{EXTENSIONS[fmt]}")
+        make_exporter(fmt).export(bible, output_path(fmt, out, code))
     typer.echo(f"{code}: {', '.join(formats)} gerado(s) em {out}.")
 
 
