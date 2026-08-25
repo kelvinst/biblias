@@ -74,8 +74,9 @@ def test_build_multiple_formats(tmp_path: Path, monkeypatch):
     monkeypatch.setattr(cli, "CORRECTIONS_DIR", tmp_path / "data" / "corrections")
 
     runner.invoke(cli.app, ["fetch", "KJA"])
-    r = runner.invoke(cli.app, ["build", "KJA", "--format", "zefania,sqlite,json", "--out", str(dist_dir)])
+    r = runner.invoke(cli.app, ["build", "KJA", "--format", "zefania,sqlite,json,markdown", "--out", str(dist_dir)])
     assert r.exit_code == 0
     assert (dist_dir / "KJA.xml").exists()
     assert (dist_dir / "KJA.sqlite").exists()
     assert (dist_dir / "KJA.json").exists()
+    assert (dist_dir / "KJA" / "PRO.md").exists()
