@@ -79,4 +79,4 @@ def test_build_multiple_formats(tmp_path: Path, monkeypatch):
     assert (dist_dir / "KJA.xml").exists()
     assert (dist_dir / "KJA.sqlite").exists()
     assert (dist_dir / "KJA.json").exists()
-    assert (dist_dir / "KJA" / "20-Proverbios.md").exists()
+    assert (dist_dir / "KJA" / "20-Proverbios" / "Proverbios-010.md").exists()
