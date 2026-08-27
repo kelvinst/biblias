@@ -4,6 +4,7 @@ import books
 from exporters.markdown import (
     MarkdownExporter,
     _book_dirname,
+    _book_note_filename,
     _category_dirname,
     _chapter_filename,
     _testament_dirname,
@@ -61,10 +62,10 @@ def test_export_writes_a_file_per_chapter(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(_bible(), out)
     assert sorted(p.name for p in (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis").iterdir()) == [
-        "KJA-01-GEN-001.md", "KJA-01-GEN-002.md",
+        "01-Genesis.md", "KJA-01-GEN-001.md", "KJA-01-GEN-002.md",
     ]
-    assert [p.name for p in (out / "1-Antigo Testamento" / "3-Sabedoria" / "20-Proverbios").iterdir()] == [
-        "KJA-20-PRO-001.md",
+    assert sorted(p.name for p in (out / "1-Antigo Testamento" / "3-Sabedoria" / "20-Proverbios").iterdir()) == [
+        "20-Proverbios.md", "KJA-20-PRO-001.md",
     ]
 
 
@@ -82,6 +83,26 @@ def test_chapter_file_shape(tmp_path: Path):
         "\n"
         "1. Assim foram... ^kja-gen-2-1\n"
     )
+
+
+def test_book_folder_note_indexes_every_chapter(tmp_path: Path):
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(_bible(), out)
+    assert (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis"
+            / "01-Genesis.md").read_text(encoding="utf-8") == (
+        "# Gênesis\n"
+        "\n"
+        "- [[KJA-01-GEN-001|1]]\n"
+        "- [[KJA-01-GEN-002|2]]\n"
+    )
+
+
+def test_folder_note_is_named_after_its_folder():
+    """Obsidian only treats the note as the folder's index when the names match."""
+    for ref in books.BOOKS:
+        book = _ref_book(ref)
+        assert _book_note_filename(book) == f"{_book_dirname(book)}.md"
+        assert _book_note_filename(book).isascii(), ref.name
 
 
 def test_verse_text_is_flattened_to_one_line(tmp_path: Path):

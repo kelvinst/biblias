@@ -42,6 +42,16 @@ def _book_dirname(book: Book) -> str:
     return f"{book.id:02d}-{_strip_accents(book.name)}"
 
 
+def _book_note_filename(book: Book) -> str:
+    """``01-Genesis.md``: an Obsidian folder note, so it must match the folder name.
+
+    That means it is *not* version-qualified like the chapter files are: the
+    folder it indexes is not either, and the name has to match exactly for
+    Obsidian to fold the note into the folder.
+    """
+    return f"{_book_dirname(book)}.md"
+
+
 def _chapter_filename(code: str, book: Book, chapter: Chapter) -> str:
     """``ARA-01-GEN-001.md``: version-qualified, so it is unique across a vault.
 
@@ -55,7 +65,8 @@ class MarkdownExporter:
     """Writes one Markdown file per chapter, grouped in a folder per book.
 
     Layout is ``<version>/1-Antigo Testamento/1-Lei/01-Genesis/
-    ARA-01-GEN-001.md``. Testament, category, book and chapter names are
+    ARA-01-GEN-001.md``, with an ``01-Genesis.md`` folder note beside the
+    chapters indexing them. Testament, category, book and chapter names are
     numbered so Finder and Obsidian sort them in canonical order, accents are
     stripped, and the version prefix keeps the note unique in a vault holding
     several translations. The chapter body is a plain Markdown ordered list --
@@ -69,10 +80,21 @@ class MarkdownExporter:
             book_dir = (path / _testament_dirname(book) / _category_dirname(book)
                         / _book_dirname(book))
             book_dir.mkdir(parents=True, exist_ok=True)
+            (book_dir / _book_note_filename(book)).write_text(
+                self._render_book_note(bible.meta.code, book), encoding="utf-8"
+            )
             for chapter in book.chapters:
                 (book_dir / _chapter_filename(bible.meta.code, book, chapter)).write_text(
                     self._render_chapter(bible.meta.code, book, chapter), encoding="utf-8"
                 )
+
+    def _render_book_note(self, code: str, book: Book) -> str:
+        """Index page for the book: the title, then one link per chapter."""
+        lines = [f"# {book.name}", ""]
+        for chapter in book.chapters:
+            note = _chapter_filename(code, book, chapter).removesuffix(".md")
+            lines.append(f"- [[{note}|{chapter.number}]]")
+        return "\n".join(lines + [""])
 
     def _render_chapter(self, code: str, book: Book, chapter: Chapter) -> str:
         lines = [f"# {book.name} {chapter.number}", ""]
