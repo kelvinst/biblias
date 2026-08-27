@@ -12,10 +12,29 @@ def _strip_accents(text: str) -> str:
 
 _TESTAMENT_DIRS = {"OT": "1-Antigo Testamento", "NT": "2-Novo Testamento"}
 
+# (last book id in the category, folder name). Every category is a contiguous
+# id range, so the first entry a book fits under is its category.
+_CATEGORY_DIRS: tuple[tuple[int, str], ...] = (
+    (5, "1-Lei"),               # Gênesis..Deuteronômio
+    (17, "2-História"),         # Josué..Ester
+    (22, "3-Sabedoria"),        # Jó..Cânticos
+    (39, "4-Profetas"),         # Isaías..Malaquias
+    (43, "1-Evangelhos"),       # Mateus..João
+    (44, "2-História"),         # Atos
+    (65, "3-Cartas"),           # Romanos..Judas
+    (66, "4-Profecia"),         # Apocalipse
+)
+
 
 def _testament_dirname(book: Book) -> str:
     """``1-Antigo Testamento``: numbered so the two sort in canonical order."""
     return _TESTAMENT_DIRS[books.by_id(book.id).testament]
+
+
+def _category_dirname(book: Book) -> str:
+    """``1-Lei``: numbered within its testament so the categories stay in order."""
+    return next(_strip_accents(name) for last_id, name in _CATEGORY_DIRS
+                if book.id <= last_id)
 
 
 def _book_dirname(book: Book) -> str:
@@ -31,18 +50,19 @@ def _chapter_filename(code: str, book: Book, chapter: Chapter) -> str:
 class MarkdownExporter:
     """Writes one Markdown file per chapter, grouped in a folder per book.
 
-    Layout is ``<version>/1-Antigo Testamento/01-Genesis/ARA-01-Genesis-001.md``.
-    Testament, book and chapter numbers are zero-padded or prefixed so Finder
-    and Obsidian sort them in canonical order, accents are stripped, and the
-    version prefix keeps the note unique in a vault holding several
-    translations. Each verse is a single line ending in an Obsidian block id
+    Layout is ``<version>/1-Antigo Testamento/1-Lei/01-Genesis/
+    ARA-01-Genesis-001.md``. Testament, category, book and chapter names are
+    numbered so Finder and Obsidian sort them in canonical order, accents are
+    stripped, and the version prefix keeps the note unique in a vault holding
+    several translations. Each verse is a single line ending in a block id
     (``^acf-gen-1-1``) so verses stay individually linkable; the id keeps
     using the USFM code, so renaming files never invalidates a link.
     """
 
     def export(self, bible: Bible, path: Path) -> None:
         for book in bible.books:
-            book_dir = path / _testament_dirname(book) / _book_dirname(book)
+            book_dir = (path / _testament_dirname(book) / _category_dirname(book)
+                        / _book_dirname(book))
             book_dir.mkdir(parents=True, exist_ok=True)
             for chapter in book.chapters:
                 (book_dir / _chapter_filename(bible.meta.code, book, chapter)).write_text(

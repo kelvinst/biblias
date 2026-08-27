@@ -17,7 +17,7 @@
 - **Zefania XML**: formato padrão, importado por Quelea, MyBible, And Bible, OpenLP e outros.
 - **SQLite**: banco no esquema do [OpenLP](https://openlp.org/) (outros programas usam esquemas SQLite diferentes).
 - **JSON**: formato aberto, para qualquer outro uso.
-- **Markdown**: um arquivo por capítulo, em uma pasta por livro (`ACF/1-Antigo Testamento/01-Genesis/ACF-01-Genesis-001.md`), com um versículo por linha e identificador de bloco (`^acf-gen-1-1`) para linkar versículo a versículo no Obsidian e afins.
+- **Markdown**: um arquivo por capítulo, em uma pasta por livro (`ACF/1-Antigo Testamento/1-Lei/01-Genesis/ACF-01-Genesis-001.md`), com um versículo por linha e identificador de bloco (`^acf-gen-1-1`) para linkar versículo a versículo no Obsidian e afins.
 
 <table>
   <tr>
