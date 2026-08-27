@@ -37,19 +37,23 @@ def _category_dirname(book: Book) -> str:
                 if book.id <= last_id)
 
 
-def _book_dirname(book: Book) -> str:
-    """``01-Genesis``: zero-padded id so lexical order matches canon order."""
-    return f"{book.id:02d}-{_strip_accents(book.name)}"
+def _book_dirname(code: str, book: Book) -> str:
+    """``ARA-01-Genesis``: zero-padded id so lexical order matches canon order.
 
-
-def _book_note_filename(book: Book) -> str:
-    """``01-Genesis.md``: an Obsidian folder note, so it must match the folder name.
-
-    That means it is *not* version-qualified like the chapter files are: the
-    folder it indexes is not either, and the name has to match exactly for
-    Obsidian to fold the note into the folder.
+    Version-qualified like the files inside it, because its folder note has to
+    carry the same name -- see :func:`_book_note_filename`.
     """
-    return f"{_book_dirname(book)}.md"
+    return f"{code}-{book.id:02d}-{_strip_accents(book.name)}"
+
+
+def _book_note_filename(code: str, book: Book) -> str:
+    """``ARA-01-Genesis.md``: matches the folder name, as a folder note must.
+
+    Obsidian only folds the note into the folder when the two names are equal,
+    so the folder carries the version prefix that keeps this note unique in a
+    vault holding several translations.
+    """
+    return f"{_book_dirname(code, book)}.md"
 
 
 def _chapter_filename(code: str, book: Book, chapter: Chapter) -> str:
@@ -64,8 +68,8 @@ def _chapter_filename(code: str, book: Book, chapter: Chapter) -> str:
 class MarkdownExporter:
     """Writes one Markdown file per chapter, grouped in a folder per book.
 
-    Layout is ``<version>/1-Antigo Testamento/1-Lei/01-Genesis/
-    ARA-01-GEN-001.md``, with an ``01-Genesis.md`` folder note beside the
+    Layout is ``<version>/1-Antigo Testamento/1-Lei/ARA-01-Genesis/
+    ARA-01-GEN-001.md``, with an ``ARA-01-Genesis.md`` folder note beside the
     chapters indexing them. Testament, category, book and chapter names are
     numbered so Finder and Obsidian sort them in canonical order, accents are
     stripped, and the version prefix keeps the note unique in a vault holding
@@ -78,9 +82,9 @@ class MarkdownExporter:
     def export(self, bible: Bible, path: Path) -> None:
         for book in bible.books:
             book_dir = (path / _testament_dirname(book) / _category_dirname(book)
-                        / _book_dirname(book))
+                        / _book_dirname(bible.meta.code, book))
             book_dir.mkdir(parents=True, exist_ok=True)
-            (book_dir / _book_note_filename(book)).write_text(
+            (book_dir / _book_note_filename(bible.meta.code, book)).write_text(
                 self._render_book_note(bible.meta.code, book), encoding="utf-8"
             )
             for chapter in book.chapters:
