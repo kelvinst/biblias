@@ -80,4 +80,4 @@ def test_build_multiple_formats(tmp_path: Path, monkeypatch):
     assert (dist_dir / "KJA.sqlite").exists()
     assert (dist_dir / "KJA.json").exists()
     assert (dist_dir / "KJA" / "1-Antigo Testamento" / "3-Sabedoria" / "20-Proverbios"
-            / "KJA-20-Proverbios-010.md").exists()
+            / "KJA-20-PRO-010.md").exists()
