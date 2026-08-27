@@ -1,7 +1,12 @@
 from pathlib import Path
 
 import books
-from exporters.markdown import MarkdownExporter, _book_dirname, _chapter_filename
+from exporters.markdown import (
+    MarkdownExporter,
+    _book_dirname,
+    _chapter_filename,
+    _testament_dirname,
+)
 from model import Bible, BibleMeta, Book, Chapter, Verse
 
 
@@ -22,32 +27,56 @@ def _bible() -> Bible:
     )
 
 
-def test_export_writes_a_folder_per_book(tmp_path: Path):
+def test_export_groups_books_under_a_testament_folder(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(_bible(), out)
-    assert sorted(p.name for p in out.iterdir()) == ["01-Genesis", "20-Proverbios"]
+    assert [p.name for p in out.iterdir()] == ["1-Antigo Testamento"]
+    assert sorted(p.name for p in (out / "1-Antigo Testamento").iterdir()) == [
+        "01-Genesis", "20-Proverbios",
+    ]
+
+
+def test_new_testament_books_land_in_their_own_folder(tmp_path: Path):
+    bible = Bible(
+        meta=BibleMeta(code="KJA", name="n", license="copyright", scope="full", source="t"),
+        books=[Book(id=40, code="MAT", name="Mateus", abbrev="Mt", chapters=[
+            Chapter(number=1, verses=[Verse(number=1, text="Livro da genealogia...")]),
+        ])],
+    )
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(bible, out)
+    assert (out / "2-Novo Testamento" / "40-Mateus" / "KJA-40-Mateus-001.md").exists()
+
+
+def test_testament_folders_sort_in_canonical_order():
+    names = sorted({_testament_dirname(_ref_book(ref)) for ref in books.BOOKS})
+    assert names == ["1-Antigo Testamento", "2-Novo Testamento"]
+    assert _testament_dirname(_ref_book(books.by_code("MAL"))) == "1-Antigo Testamento"
+    assert _testament_dirname(_ref_book(books.by_code("MAT"))) == "2-Novo Testamento"
 
 
 def test_export_writes_a_file_per_chapter(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(_bible(), out)
-    assert sorted(p.name for p in (out / "01-Genesis").iterdir()) == [
-        "Genesis-001.md", "Genesis-002.md",
+    assert sorted(p.name for p in (out / "1-Antigo Testamento" / "01-Genesis").iterdir()) == [
+        "KJA-01-Genesis-001.md", "KJA-01-Genesis-002.md",
     ]
-    assert [p.name for p in (out / "20-Proverbios").iterdir()] == ["Proverbios-001.md"]
+    assert [p.name for p in (out / "1-Antigo Testamento" / "20-Proverbios").iterdir()] == [
+        "KJA-20-Proverbios-001.md",
+    ]
 
 
 def test_chapter_file_shape(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(_bible(), out)
-    assert (out / "01-Genesis" / "Genesis-001.md").read_text(encoding="utf-8") == (
+    assert (out / "1-Antigo Testamento" / "01-Genesis" / "KJA-01-Genesis-001.md").read_text(encoding="utf-8") == (
         "# Gênesis 1\n"
         "\n"
         "**1** No princípio... ^kja-gen-1-1\n"
         "\n"
         "**2** E a terra... ^kja-gen-1-2\n"
     )
-    assert (out / "01-Genesis" / "Genesis-002.md").read_text(encoding="utf-8") == (
+    assert (out / "1-Antigo Testamento" / "01-Genesis" / "KJA-01-Genesis-002.md").read_text(encoding="utf-8") == (
         "# Gênesis 2\n"
         "\n"
         "**1** Assim foram... ^kja-gen-2-1\n"
@@ -63,7 +92,7 @@ def test_verse_text_is_flattened_to_one_line(tmp_path: Path):
     )
     out = tmp_path / "KJA"
     MarkdownExporter().export(bible, out)
-    body = (out / "01-Genesis" / "Genesis-001.md").read_text(encoding="utf-8")
+    body = (out / "1-Antigo Testamento" / "01-Genesis" / "KJA-01-Genesis-001.md").read_text(encoding="utf-8")
     assert "**1** linha um linha dois ^kja-gen-1-1" in body
 
 
@@ -82,14 +111,15 @@ def test_book_folders_sort_in_canonical_order():
 
 def test_chapter_files_sort_numerically():
     book = _ref_book(books.by_code("PSA"))
-    names = [_chapter_filename(book, Chapter(number=n, verses=[])) for n in (1, 2, 10, 100, 150)]
+    names = [_chapter_filename("ARA", book, Chapter(number=n, verses=[]))
+             for n in (1, 2, 10, 100, 150)]
     assert names == sorted(names)
-    assert names[0] == "Salmos-001.md"
-    assert names[-1] == "Salmos-150.md"
+    assert names[0] == "ARA-19-Salmos-001.md"
+    assert names[-1] == "ARA-19-Salmos-150.md"
 
 
 def test_names_have_no_accents():
     for ref in books.BOOKS:
         book = _ref_book(ref)
         assert _book_dirname(book).isascii(), ref.name
-        assert _chapter_filename(book, Chapter(number=1, verses=[])).isascii(), ref.name
+        assert _chapter_filename("ARA", book, Chapter(number=1, verses=[])).isascii(), ref.name
