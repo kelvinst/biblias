@@ -1,3 +1,4 @@
+import shutil
 import unicodedata
 from pathlib import Path
 
@@ -77,19 +78,27 @@ class MarkdownExporter:
     no HTML -- one verse per line, each ending in a block id (``^acf-gen-1-1``)
     so verses stay individually linkable; the id keeps using the USFM code, so
     renaming files never invalidates a link.
+
+    Exporting replaces the version folder wholesale, so a rename never leaves
+    the previous layout sitting beside the new one.
     """
 
     def export(self, bible: Bible, path: Path) -> None:
+        # Rebuild from scratch: every rename of the layout used to leave the old
+        # spelling on disk next to the new one. The folder holds nothing but this
+        # export -- it is copied into a vault, not written inside one.
+        shutil.rmtree(path, ignore_errors=True)
+        code = bible.meta.code
         for book in bible.books:
             book_dir = (path / _testament_dirname(book) / _category_dirname(book)
-                        / _book_dirname(bible.meta.code, book))
+                        / _book_dirname(code, book))
             book_dir.mkdir(parents=True, exist_ok=True)
-            (book_dir / _book_note_filename(bible.meta.code, book)).write_text(
-                self._render_book_note(bible.meta.code, book), encoding="utf-8"
+            (book_dir / _book_note_filename(code, book)).write_text(
+                self._render_book_note(code, book), encoding="utf-8"
             )
             for chapter in book.chapters:
-                (book_dir / _chapter_filename(bible.meta.code, book, chapter)).write_text(
-                    self._render_chapter(bible.meta.code, book, chapter), encoding="utf-8"
+                (book_dir / _chapter_filename(code, book, chapter)).write_text(
+                    self._render_chapter(code, book, chapter), encoding="utf-8"
                 )
 
     def _render_book_note(self, code: str, book: Book) -> str:
