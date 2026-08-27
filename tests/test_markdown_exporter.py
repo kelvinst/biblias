@@ -112,6 +112,30 @@ def test_folder_notes_of_two_versions_do_not_collide():
     assert _book_note_filename("NVI", book) == "NVI-01-Genesis.md"
 
 
+def test_export_replaces_whatever_was_in_the_folder(tmp_path: Path):
+    """A rename must not leave the previous layout sitting beside the new one."""
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(_bible(), out)
+    old_dir = out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis"  # pre-prefix folder
+    old_dir.mkdir()
+    (old_dir / "KJA-01-Genesis-003.md").write_text("velho", encoding="utf-8")
+
+    MarkdownExporter().export(_bible(), out)
+
+    assert not old_dir.exists()
+    assert sorted(p.name for p in (out / "1-Antigo Testamento" / "1-Lei"
+                                   / "KJA-01-Genesis").iterdir()) == [
+        "KJA-01-GEN-001.md", "KJA-01-GEN-002.md", "KJA-01-Genesis.md",
+    ]
+
+
+def test_export_works_when_the_folder_does_not_exist_yet(tmp_path: Path):
+    out = tmp_path / "nova" / "KJA"
+    MarkdownExporter().export(_bible(), out)
+    assert (out / "1-Antigo Testamento" / "1-Lei" / "KJA-01-Genesis"
+            / "KJA-01-Genesis.md").exists()
+
+
 def test_verse_text_is_flattened_to_one_line(tmp_path: Path):
     bible = Bible(
         meta=BibleMeta(code="KJA", name="n", license="copyright", scope="full", source="t"),
