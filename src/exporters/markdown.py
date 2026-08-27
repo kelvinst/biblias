@@ -108,9 +108,13 @@ class MarkdownExporter:
                 )
 
     def _render_book_note(self, code: str, book: Book) -> str:
-        """Index page for the book: the title, then one link per chapter."""
+        """Index page for the book: the title, then one link per chapter.
+
+        Sorted by number rather than taken in source order, the way the
+        zero-padded chapter file names already are.
+        """
         lines = [f"# {book.name}", ""]
-        for chapter in book.chapters:
+        for chapter in sorted(book.chapters, key=lambda c: c.number):
             note = _chapter_filename(code, book, chapter).removesuffix(".md")
             lines.append(f"- [[{note}|{chapter.number}]]")
         return "\n".join(lines + [""])
