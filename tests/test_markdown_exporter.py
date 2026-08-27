@@ -97,6 +97,27 @@ def test_book_folder_note_indexes_every_chapter(tmp_path: Path):
     )
 
 
+def test_folder_note_lists_chapters_in_order_whatever_the_source_gave(tmp_path: Path):
+    """Chapter file names sort by their zero-padded number; the index must too."""
+    bible = Bible(
+        meta=BibleMeta(code="KJA", name="n", license="copyright", scope="full", source="t"),
+        books=[Book(id=1, code="GEN", name="Gênesis", abbrev="Gn", chapters=[
+            Chapter(number=n, verses=[Verse(number=1, text="t")]) for n in (10, 1, 2)
+        ])],
+    )
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(bible, out)
+    note = (out / "1-Antigo Testamento" / "1-Lei" / "KJA-01-Genesis"
+            / "KJA-01-Genesis.md").read_text(encoding="utf-8")
+    assert note == (
+        "# Gênesis\n"
+        "\n"
+        "- [[KJA-01-GEN-001|1]]\n"
+        "- [[KJA-01-GEN-002|2]]\n"
+        "- [[KJA-01-GEN-010|10]]\n"
+    )
+
+
 def test_folder_note_is_named_after_its_folder():
     """Obsidian only treats the note as the folder's index when the names match."""
     for ref in books.BOOKS:
