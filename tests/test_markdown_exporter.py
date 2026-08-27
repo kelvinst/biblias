@@ -47,7 +47,7 @@ def test_new_testament_books_land_in_their_own_folder(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(bible, out)
     assert (out / "2-Novo Testamento" / "1-Evangelhos" / "40-Mateus"
-            / "KJA-40-Mateus-001.md").exists()
+            / "KJA-40-MAT-001.md").exists()
 
 
 def test_testament_folders_sort_in_canonical_order():
@@ -61,24 +61,24 @@ def test_export_writes_a_file_per_chapter(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(_bible(), out)
     assert sorted(p.name for p in (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis").iterdir()) == [
-        "KJA-01-Genesis-001.md", "KJA-01-Genesis-002.md",
+        "KJA-01-GEN-001.md", "KJA-01-GEN-002.md",
     ]
     assert [p.name for p in (out / "1-Antigo Testamento" / "3-Sabedoria" / "20-Proverbios").iterdir()] == [
-        "KJA-20-Proverbios-001.md",
+        "KJA-20-PRO-001.md",
     ]
 
 
 def test_chapter_file_shape(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(_bible(), out)
-    assert (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis" / "KJA-01-Genesis-001.md").read_text(encoding="utf-8") == (
+    assert (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis" / "KJA-01-GEN-001.md").read_text(encoding="utf-8") == (
         "# Gênesis 1\n"
         "\n"
         "**1** No princípio... ^kja-gen-1-1\n"
         "\n"
         "**2** E a terra... ^kja-gen-1-2\n"
     )
-    assert (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis" / "KJA-01-Genesis-002.md").read_text(encoding="utf-8") == (
+    assert (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis" / "KJA-01-GEN-002.md").read_text(encoding="utf-8") == (
         "# Gênesis 2\n"
         "\n"
         "**1** Assim foram... ^kja-gen-2-1\n"
@@ -94,7 +94,7 @@ def test_verse_text_is_flattened_to_one_line(tmp_path: Path):
     )
     out = tmp_path / "KJA"
     MarkdownExporter().export(bible, out)
-    body = (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis" / "KJA-01-Genesis-001.md").read_text(encoding="utf-8")
+    body = (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis" / "KJA-01-GEN-001.md").read_text(encoding="utf-8")
     assert "**1** linha um linha dois ^kja-gen-1-1" in body
 
 
@@ -116,8 +116,17 @@ def test_chapter_files_sort_numerically():
     names = [_chapter_filename("ARA", book, Chapter(number=n, verses=[]))
              for n in (1, 2, 10, 100, 150)]
     assert names == sorted(names)
-    assert names[0] == "ARA-19-Salmos-001.md"
-    assert names[-1] == "ARA-19-Salmos-150.md"
+    assert names[0] == "ARA-19-PSA-001.md"
+    assert names[-1] == "ARA-19-PSA-150.md"
+
+
+def test_chapter_filenames_differ_only_by_the_version_prefix():
+    """A version calling book 22 "Cantares" must still write ``<code>-22-SNG-001.md``."""
+    chapter = Chapter(number=1, verses=[])
+    ara = Book(id=22, code="SNG", name="Cânticos", abbrev="Ct", chapters=[])
+    nvi = Book(id=22, code="SNG", name="Cantares de Salomão", abbrev="Ct", chapters=[])
+    assert _chapter_filename("ARA", ara, chapter) == "ARA-22-SNG-001.md"
+    assert _chapter_filename("NVI", nvi, chapter) == "NVI-22-SNG-001.md"
 
 
 def test_names_have_no_accents():

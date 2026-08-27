@@ -43,15 +43,19 @@ def _book_dirname(book: Book) -> str:
 
 
 def _chapter_filename(code: str, book: Book, chapter: Chapter) -> str:
-    """``ARA-01-Genesis-001.md``: version-qualified, so it is unique across a vault."""
-    return f"{code}-{_book_dirname(book)}-{chapter.number:03d}.md"
+    """``ARA-01-GEN-001.md``: version-qualified, so it is unique across a vault.
+
+    The USFM code, not the Portuguese name, keeps the name identical in every
+    version -- only the prefix changes -- so notes line up across translations.
+    """
+    return f"{code}-{book.id:02d}-{book.code}-{chapter.number:03d}.md"
 
 
 class MarkdownExporter:
     """Writes one Markdown file per chapter, grouped in a folder per book.
 
     Layout is ``<version>/1-Antigo Testamento/1-Lei/01-Genesis/
-    ARA-01-Genesis-001.md``. Testament, category, book and chapter names are
+    ARA-01-GEN-001.md``. Testament, category, book and chapter names are
     numbered so Finder and Obsidian sort them in canonical order, accents are
     stripped, and the version prefix keeps the note unique in a vault holding
     several translations. Each verse is a single line ending in a block id
