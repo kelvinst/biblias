@@ -47,7 +47,7 @@ def test_new_testament_books_land_in_their_own_folder(tmp_path: Path):
     )
     out = tmp_path / "KJA"
     MarkdownExporter().export(bible, out)
-    assert (out / "2-Novo Testamento" / "1-Evangelhos" / "40-Mateus"
+    assert (out / "2-Novo Testamento" / "1-Evangelhos" / "KJA-40-Mateus"
             / "KJA-40-MAT-001.md").exists()
 
 
@@ -61,24 +61,24 @@ def test_testament_folders_sort_in_canonical_order():
 def test_export_writes_a_file_per_chapter(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(_bible(), out)
-    assert sorted(p.name for p in (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis").iterdir()) == [
-        "01-Genesis.md", "KJA-01-GEN-001.md", "KJA-01-GEN-002.md",
+    assert sorted(p.name for p in (out / "1-Antigo Testamento" / "1-Lei" / "KJA-01-Genesis").iterdir()) == [
+        "KJA-01-GEN-001.md", "KJA-01-GEN-002.md", "KJA-01-Genesis.md",
     ]
-    assert sorted(p.name for p in (out / "1-Antigo Testamento" / "3-Sabedoria" / "20-Proverbios").iterdir()) == [
-        "20-Proverbios.md", "KJA-20-PRO-001.md",
+    assert sorted(p.name for p in (out / "1-Antigo Testamento" / "3-Sabedoria" / "KJA-20-Proverbios").iterdir()) == [
+        "KJA-20-PRO-001.md", "KJA-20-Proverbios.md",
     ]
 
 
 def test_chapter_file_shape(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(_bible(), out)
-    assert (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis" / "KJA-01-GEN-001.md").read_text(encoding="utf-8") == (
+    assert (out / "1-Antigo Testamento" / "1-Lei" / "KJA-01-Genesis" / "KJA-01-GEN-001.md").read_text(encoding="utf-8") == (
         "# Gênesis 1\n"
         "\n"
         "1. No princípio... ^kja-gen-1-1\n"
         "2. E a terra... ^kja-gen-1-2\n"
     )
-    assert (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis" / "KJA-01-GEN-002.md").read_text(encoding="utf-8") == (
+    assert (out / "1-Antigo Testamento" / "1-Lei" / "KJA-01-Genesis" / "KJA-01-GEN-002.md").read_text(encoding="utf-8") == (
         "# Gênesis 2\n"
         "\n"
         "1. Assim foram... ^kja-gen-2-1\n"
@@ -88,8 +88,8 @@ def test_chapter_file_shape(tmp_path: Path):
 def test_book_folder_note_indexes_every_chapter(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(_bible(), out)
-    assert (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis"
-            / "01-Genesis.md").read_text(encoding="utf-8") == (
+    assert (out / "1-Antigo Testamento" / "1-Lei" / "KJA-01-Genesis"
+            / "KJA-01-Genesis.md").read_text(encoding="utf-8") == (
         "# Gênesis\n"
         "\n"
         "- [[KJA-01-GEN-001|1]]\n"
@@ -101,8 +101,15 @@ def test_folder_note_is_named_after_its_folder():
     """Obsidian only treats the note as the folder's index when the names match."""
     for ref in books.BOOKS:
         book = _ref_book(ref)
-        assert _book_note_filename(book) == f"{_book_dirname(book)}.md"
-        assert _book_note_filename(book).isascii(), ref.name
+        assert _book_note_filename("ARA", book) == f"{_book_dirname('ARA', book)}.md"
+        assert _book_note_filename("ARA", book).isascii(), ref.name
+
+
+def test_folder_notes_of_two_versions_do_not_collide():
+    """The prefix is what keeps both translations' Genesis notes distinct."""
+    book = _ref_book(books.by_code("GEN"))
+    assert _book_note_filename("ARA", book) == "ARA-01-Genesis.md"
+    assert _book_note_filename("NVI", book) == "NVI-01-Genesis.md"
 
 
 def test_verse_text_is_flattened_to_one_line(tmp_path: Path):
@@ -114,7 +121,7 @@ def test_verse_text_is_flattened_to_one_line(tmp_path: Path):
     )
     out = tmp_path / "KJA"
     MarkdownExporter().export(bible, out)
-    body = (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis" / "KJA-01-GEN-001.md").read_text(encoding="utf-8")
+    body = (out / "1-Antigo Testamento" / "1-Lei" / "KJA-01-Genesis" / "KJA-01-GEN-001.md").read_text(encoding="utf-8")
     assert "1. linha um linha dois ^kja-gen-1-1" in body
 
 
@@ -123,12 +130,12 @@ def _ref_book(ref: books.BookRef) -> Book:
 
 
 def test_book_folders_sort_in_canonical_order():
-    names = [_book_dirname(_ref_book(ref)) for ref in books.BOOKS]
+    names = [_book_dirname("ARA", _ref_book(ref)) for ref in books.BOOKS]
     assert names == sorted(names)
-    assert names[0] == "01-Genesis"
-    assert names[8] == "09-1 Samuel"
-    assert names[24] == "25-Lamentacoes de Jeremias"
-    assert names[65] == "66-Apocalipse"
+    assert names[0] == "ARA-01-Genesis"
+    assert names[8] == "ARA-09-1 Samuel"
+    assert names[24] == "ARA-25-Lamentacoes de Jeremias"
+    assert names[65] == "ARA-66-Apocalipse"
 
 
 def test_chapter_files_sort_numerically():
@@ -152,7 +159,7 @@ def test_chapter_filenames_differ_only_by_the_version_prefix():
 def test_names_have_no_accents():
     for ref in books.BOOKS:
         book = _ref_book(ref)
-        assert _book_dirname(book).isascii(), ref.name
+        assert _book_dirname("ARA", book).isascii(), ref.name
         assert _chapter_filename("ARA", book, Chapter(number=1, verses=[])).isascii(), ref.name
 
 
