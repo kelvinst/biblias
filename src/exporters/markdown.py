@@ -87,7 +87,13 @@ class MarkdownExporter:
         # Rebuild from scratch: every rename of the layout used to leave the old
         # spelling on disk next to the new one. The folder holds nothing but this
         # export -- it is copied into a vault, not written inside one.
-        shutil.rmtree(path, ignore_errors=True)
+        # Only a missing folder is expected here: anything else -- a symlink, a
+        # regular file, a permission error -- means the wipe did not happen, and
+        # raising says so instead of leaving the old layout behind in silence.
+        try:
+            shutil.rmtree(path)
+        except FileNotFoundError:
+            pass
         code = bible.meta.code
         for book in bible.books:
             book_dir = (path / _testament_dirname(book) / _category_dirname(book)
