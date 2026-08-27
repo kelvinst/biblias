@@ -74,14 +74,14 @@ def test_chapter_file_shape(tmp_path: Path):
     assert (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis" / "KJA-01-GEN-001.md").read_text(encoding="utf-8") == (
         "# Gênesis 1\n"
         "\n"
-        "**1** No princípio... ^kja-gen-1-1\n"
+        "<sup>1</sup> No princípio... ^kja-gen-1-1\n"
         "\n"
-        "**2** E a terra... ^kja-gen-1-2\n"
+        "<sup>2</sup> E a terra... ^kja-gen-1-2\n"
     )
     assert (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis" / "KJA-01-GEN-002.md").read_text(encoding="utf-8") == (
         "# Gênesis 2\n"
         "\n"
-        "**1** Assim foram... ^kja-gen-2-1\n"
+        "<sup>1</sup> Assim foram... ^kja-gen-2-1\n"
     )
 
 
@@ -95,7 +95,7 @@ def test_verse_text_is_flattened_to_one_line(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(bible, out)
     body = (out / "1-Antigo Testamento" / "1-Lei" / "01-Genesis" / "KJA-01-GEN-001.md").read_text(encoding="utf-8")
-    assert "**1** linha um linha dois ^kja-gen-1-1" in body
+    assert "<sup>1</sup> linha um linha dois ^kja-gen-1-1" in body
 
 
 def _ref_book(ref: books.BookRef) -> Book:

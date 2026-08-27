@@ -78,5 +78,5 @@ class MarkdownExporter:
         for verse in chapter.verses:
             text = " ".join(verse.text.split())
             block_id = f"{code}-{book.code}-{chapter.number}-{verse.number}".lower()
-            lines += [f"**{verse.number}** {text} ^{block_id}", ""]
+            lines += [f"<sup>{verse.number}</sup> {text} ^{block_id}", ""]
         return "\n".join(lines)
