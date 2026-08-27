@@ -58,9 +58,10 @@ class MarkdownExporter:
     ARA-01-GEN-001.md``. Testament, category, book and chapter names are
     numbered so Finder and Obsidian sort them in canonical order, accents are
     stripped, and the version prefix keeps the note unique in a vault holding
-    several translations. Each verse is a single line ending in a block id
-    (``^acf-gen-1-1``) so verses stay individually linkable; the id keeps
-    using the USFM code, so renaming files never invalidates a link.
+    several translations. The chapter body is a plain Markdown ordered list --
+    no HTML -- one verse per line, each ending in a block id (``^acf-gen-1-1``)
+    so verses stay individually linkable; the id keeps using the USFM code, so
+    renaming files never invalidates a link.
     """
 
     def export(self, bible: Bible, path: Path) -> None:
@@ -78,5 +79,5 @@ class MarkdownExporter:
         for verse in chapter.verses:
             text = " ".join(verse.text.split())
             block_id = f"{code}-{book.code}-{chapter.number}-{verse.number}".lower()
-            lines += [f"<sup>{verse.number}</sup> {text} ^{block_id}", ""]
-        return "\n".join(lines)
+            lines.append(f"{verse.number}. {text} ^{block_id}")
+        return "\n".join(lines) + "\n"
