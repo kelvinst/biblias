@@ -76,11 +76,16 @@ def test_chapter_file_shape(tmp_path: Path):
     assert (out / "1-Antigo Testamento" / "1-Lei" / "KJA-01-Genesis" / "KJA-01-GEN-001.md").read_text(encoding="utf-8") == (
         "# Gênesis 1\n"
         "\n"
+        "[[KJA-01-Genesis|Gênesis]] · [[KJA-01-GEN-002|Gênesis 2 →]]\n"
+        "\n"
         "1. No princípio... ^kja-gen-1-1\n"
         "2. E a terra... ^kja-gen-1-2\n"
     )
     assert (out / "1-Antigo Testamento" / "1-Lei" / "KJA-01-Genesis" / "KJA-01-GEN-002.md").read_text(encoding="utf-8") == (
         "# Gênesis 2\n"
+        "\n"
+        "[[KJA-01-GEN-001|← Gênesis 1]] · [[KJA-01-Genesis|Gênesis]] "
+        "· [[KJA-20-PRO-001|Provérbios 1 →]]\n"
         "\n"
         "1. Assim foram... ^kja-gen-2-1\n"
     )
@@ -215,6 +220,26 @@ def test_export_works_when_the_folder_does_not_exist_yet(tmp_path: Path):
     MarkdownExporter().export(_bible(), out)
     assert (out / "1-Antigo Testamento" / "1-Lei" / "KJA-01-Genesis"
             / "KJA-01-Genesis.md").exists()
+
+
+def test_chapter_nav_crosses_into_the_next_book(tmp_path: Path):
+    """The last chapter of a book points at the first of the one after it."""
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(_bible(), out)
+    nav = (out / "1-Antigo Testamento" / "3-Sabedoria" / "KJA-20-Proverbios"
+           / "KJA-20-PRO-001.md").read_text(encoding="utf-8").splitlines()[2]
+    assert nav == ("[[KJA-01-GEN-002|← Gênesis 2]] · [[KJA-20-Proverbios|Provérbios]]")
+
+
+def test_first_and_last_chapter_drop_the_link_they_have_no_neighbour_for(tmp_path: Path):
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(_bible(), out)
+    first = (out / "1-Antigo Testamento" / "1-Lei" / "KJA-01-Genesis"
+             / "KJA-01-GEN-001.md").read_text(encoding="utf-8").splitlines()[2]
+    last = (out / "1-Antigo Testamento" / "3-Sabedoria" / "KJA-20-Proverbios"
+            / "KJA-20-PRO-001.md").read_text(encoding="utf-8").splitlines()[2]
+    assert "←" not in first
+    assert "→" not in last
 
 
 def test_verse_text_is_flattened_to_one_line(tmp_path: Path):

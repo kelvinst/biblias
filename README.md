@@ -17,7 +17,7 @@
 - **Zefania XML**: formato padrão, importado por Quelea, MyBible, And Bible, OpenLP e outros.
 - **SQLite**: banco no esquema do [OpenLP](https://openlp.org/) (outros programas usam esquemas SQLite diferentes).
 - **JSON**: formato aberto, para qualquer outro uso.
-- **Markdown**: um arquivo por capítulo, em uma pasta por livro (`ACF/1-Antigo Testamento/1-Lei/ACF-01-Genesis/ACF-01-GEN-001.md`), com um versículo por linha e identificador de bloco (`^acf-gen-1-1`) para linkar versículo a versículo no Obsidian e afins. Cada pasta de livro traz uma nota de índice com o nome da pasta (`ACF-01-Genesis.md`) — a *folder note* do Obsidian — com os capítulos em uma tabela de dez colunas, para achar qualquer um sem rolar a tela.
+- **Markdown**: um arquivo por capítulo, em uma pasta por livro (`ACF/1-Antigo Testamento/1-Lei/ACF-01-Genesis/ACF-01-GEN-001.md`), com um versículo por linha e identificador de bloco (`^acf-gen-1-1`) para linkar versículo a versículo no Obsidian e afins. Cada pasta de livro traz uma nota de índice com o nome da pasta (`ACF-01-Genesis.md`) — a *folder note* do Obsidian — com os capítulos em uma tabela de dez colunas, para achar qualquer um sem rolar a tela. Cada capítulo abre com links para o anterior, o índice do livro e o próximo, atravessando os livros (Gênesis 50 → Êxodo 1).
 
 <table>
   <tr>
