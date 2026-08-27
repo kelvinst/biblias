@@ -115,9 +115,10 @@ class MarkdownExporter:
         """Index page for the book: the title, then a grid of chapter links.
 
         A Markdown table, ten chapters to a row, so the whole book fits on one
-        screen -- a plain list put chapter 30 below the fold. The header row is
-        empty because Markdown has no table without one, and the pipe in a
-        wikilink alias is escaped so it does not end the cell.
+        screen -- a plain list put chapter 30 below the fold. Markdown has no
+        table without a header, so the first ten chapters are the header rather
+        than a blank strip above the grid. The pipe in a wikilink alias is
+        escaped so it does not end the cell.
 
         Chapters are sorted by number rather than taken in source order, the
         way the zero-padded chapter file names already are.
@@ -125,15 +126,19 @@ class MarkdownExporter:
         chapters = sorted(book.chapters, key=lambda c: c.number)
         # Obadias has one chapter and should not render nine empty cells.
         columns = min(_NOTE_COLUMNS, len(chapters))
+
+        def row(cells: list[str]) -> str:
+            return "| " + " | ".join(cells + [""] * (columns - len(cells))) + " |"
+
+        def link(chapter: Chapter) -> str:
+            note = _chapter_filename(code, book, chapter).removesuffix(".md")
+            return f"[[{note}\\|{chapter.number}]]"
+
         lines = [f"# {book.name}", "",
-                 "|" + "   |" * columns,
+                 row([link(c) for c in chapters[:columns]]),
                  "|" + ":-:|" * columns]
-        for start in range(0, len(chapters), columns):
-            row = chapters[start:start + columns]
-            cells = [f"[[{_chapter_filename(code, book, c).removesuffix('.md')}"
-                     f"\\|{c.number}]]" for c in row]
-            cells += [""] * (columns - len(cells))
-            lines.append("| " + " | ".join(cells) + " |")
+        for start in range(columns, len(chapters), columns):
+            lines.append(row([link(c) for c in chapters[start:start + columns]]))
         return "\n".join(lines + [""])
 
     def _render_chapter(self, code: str, book: Book, chapter: Chapter) -> str:
