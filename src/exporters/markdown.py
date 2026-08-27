@@ -13,6 +13,10 @@ def _strip_accents(text: str) -> str:
 
 _TESTAMENT_DIRS = {"OT": "1-Antigo Testamento", "NT": "2-Novo Testamento"}
 
+# Chapters per row in a book's index table. Ten keeps Salmos at 15 rows, so any
+# chapter is one glance away instead of a scroll down a 150-item list.
+_NOTE_COLUMNS = 10
+
 # (last book id in the category, folder name). Every category is a contiguous
 # id range, so the first entry a book fits under is its category.
 _CATEGORY_DIRS: tuple[tuple[int, str], ...] = (
@@ -108,15 +112,28 @@ class MarkdownExporter:
                 )
 
     def _render_book_note(self, code: str, book: Book) -> str:
-        """Index page for the book: the title, then one link per chapter.
+        """Index page for the book: the title, then a grid of chapter links.
 
-        Sorted by number rather than taken in source order, the way the
-        zero-padded chapter file names already are.
+        A Markdown table, ten chapters to a row, so the whole book fits on one
+        screen -- a plain list put chapter 30 below the fold. The header row is
+        empty because Markdown has no table without one, and the pipe in a
+        wikilink alias is escaped so it does not end the cell.
+
+        Chapters are sorted by number rather than taken in source order, the
+        way the zero-padded chapter file names already are.
         """
-        lines = [f"# {book.name}", ""]
-        for chapter in sorted(book.chapters, key=lambda c: c.number):
-            note = _chapter_filename(code, book, chapter).removesuffix(".md")
-            lines.append(f"- [[{note}|{chapter.number}]]")
+        chapters = sorted(book.chapters, key=lambda c: c.number)
+        # Obadias has one chapter and should not render nine empty cells.
+        columns = min(_NOTE_COLUMNS, len(chapters))
+        lines = [f"# {book.name}", "",
+                 "|" + "   |" * columns,
+                 "|" + ":-:|" * columns]
+        for start in range(0, len(chapters), columns):
+            row = chapters[start:start + columns]
+            cells = [f"[[{_chapter_filename(code, book, c).removesuffix('.md')}"
+                     f"\\|{c.number}]]" for c in row]
+            cells += [""] * (columns - len(cells))
+            lines.append("| " + " | ".join(cells) + " |")
         return "\n".join(lines + [""])
 
     def _render_chapter(self, code: str, book: Book, chapter: Chapter) -> str:

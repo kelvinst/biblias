@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 import books
@@ -92,8 +93,9 @@ def test_book_folder_note_indexes_every_chapter(tmp_path: Path):
             / "KJA-01-Genesis.md").read_text(encoding="utf-8") == (
         "# Gênesis\n"
         "\n"
-        "- [[KJA-01-GEN-001|1]]\n"
-        "- [[KJA-01-GEN-002|2]]\n"
+        "|   |   |\n"
+        "|:-:|:-:|\n"
+        "| [[KJA-01-GEN-001\\|1]] | [[KJA-01-GEN-002\\|2]] |\n"
     )
 
 
@@ -109,12 +111,71 @@ def test_folder_note_lists_chapters_in_order_whatever_the_source_gave(tmp_path: 
     MarkdownExporter().export(bible, out)
     note = (out / "1-Antigo Testamento" / "1-Lei" / "KJA-01-Genesis"
             / "KJA-01-Genesis.md").read_text(encoding="utf-8")
-    assert note == (
-        "# Gênesis\n"
+    assert note.splitlines()[2:] == [
+        "|   |   |   |",
+        "|:-:|:-:|:-:|",
+        "| [[KJA-01-GEN-001\\|1]] | [[KJA-01-GEN-002\\|2]] | [[KJA-01-GEN-010\\|10]] |",
+    ]
+
+
+def _cells(row: str) -> list[str]:
+    """Split a table row on its real cell borders, not the escaped ones."""
+    return re.split(r"(?<!\\)\|", row)[1:-1]
+
+
+def test_folder_note_wraps_every_ten_chapters(tmp_path: Path):
+    """Salmos must be a 15-row grid, not a 150-item list you scroll through."""
+    bible = Bible(
+        meta=BibleMeta(code="KJA", name="n", license="copyright", scope="full", source="t"),
+        books=[Book(id=19, code="PSA", name="Salmos", abbrev="Sl", chapters=[
+            Chapter(number=n, verses=[Verse(number=1, text="t")]) for n in range(1, 151)
+        ])],
+    )
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(bible, out)
+    rows = (out / "1-Antigo Testamento" / "3-Sabedoria" / "KJA-19-Salmos"
+            / "KJA-19-Salmos.md").read_text(encoding="utf-8").splitlines()[4:]
+    assert len(rows) == 15
+    assert rows[0].startswith("| [[KJA-19-PSA-001\\|1]] |")
+    assert rows[0].endswith("| [[KJA-19-PSA-010\\|10]] |")
+    assert rows[-1].startswith("| [[KJA-19-PSA-141\\|141]] |")
+    assert all(len(_cells(row)) == 10 for row in rows)
+
+
+def test_folder_note_pads_a_short_last_row(tmp_path: Path):
+    """Every row carries ten cells, so the grid stays rectangular."""
+    bible = Bible(
+        meta=BibleMeta(code="KJA", name="n", license="copyright", scope="full", source="t"),
+        books=[Book(id=1, code="GEN", name="Gênesis", abbrev="Gn", chapters=[
+            Chapter(number=n, verses=[Verse(number=1, text="t")]) for n in range(1, 13)
+        ])],
+    )
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(bible, out)
+    rows = (out / "1-Antigo Testamento" / "1-Lei" / "KJA-01-Genesis"
+            / "KJA-01-Genesis.md").read_text(encoding="utf-8").splitlines()[4:]
+    assert len(rows) == 2
+    assert rows[1] == ("| [[KJA-01-GEN-011\\|11]] | [[KJA-01-GEN-012\\|12]] "
+                       "|  |  |  |  |  |  |  |  |")
+
+
+def test_folder_note_of_a_one_chapter_book_is_a_single_cell(tmp_path: Path):
+    """Obadias should not render nine empty cells to reach ten columns."""
+    bible = Bible(
+        meta=BibleMeta(code="KJA", name="n", license="copyright", scope="full", source="t"),
+        books=[Book(id=31, code="OBA", name="Obadias", abbrev="Ob", chapters=[
+            Chapter(number=1, verses=[Verse(number=1, text="t")]),
+        ])],
+    )
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(bible, out)
+    assert (out / "1-Antigo Testamento" / "4-Profetas" / "KJA-31-Obadias"
+            / "KJA-31-Obadias.md").read_text(encoding="utf-8") == (
+        "# Obadias\n"
         "\n"
-        "- [[KJA-01-GEN-001|1]]\n"
-        "- [[KJA-01-GEN-002|2]]\n"
-        "- [[KJA-01-GEN-010|10]]\n"
+        "|   |\n"
+        "|:-:|\n"
+        "| [[KJA-31-OBA-001\\|1]] |\n"
     )
 
 
