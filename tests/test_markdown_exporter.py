@@ -1,11 +1,9 @@
-import re
 from pathlib import Path
 
 import books
 from exporters.markdown import (
     MarkdownExporter,
     _book_dirname,
-    _book_note_filename,
     _category_dirname,
     _chapter_filename,
 )
@@ -58,11 +56,18 @@ def test_export_writes_a_file_per_chapter(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(_bible(), out)
     assert sorted(p.name for p in (out / "1-OT-Law" / "KJA-01-GEN").iterdir()) == [
-        "KJA-01-GEN-001.md", "KJA-01-GEN-002.md", "KJA-01-GEN.md",
+        "KJA-01-GEN-001.md", "KJA-01-GEN-002.md",
     ]
     assert sorted(p.name for p in (out / "3-OT-Wisdom" / "KJA-20-PRO").iterdir()) == [
-        "KJA-20-PRO-001.md", "KJA-20-PRO.md",
+        "KJA-20-PRO-001.md",
     ]
+
+
+def test_export_writes_nothing_but_the_chapters(tmp_path: Path):
+    """The book index is navigation, and an Obsidian plugin builds that itself."""
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(_bible(), out)
+    assert not (out / "1-OT-Law" / "KJA-01-GEN" / "KJA-01-GEN.md").exists()
 
 
 def test_chapter_file_shape(tmp_path: Path):
@@ -71,126 +76,23 @@ def test_chapter_file_shape(tmp_path: Path):
     assert (out / "1-OT-Law" / "KJA-01-GEN" / "KJA-01-GEN-001.md").read_text(encoding="utf-8") == (
         "# Gênesis 1\n"
         "\n"
-        "[[KJA-01-GEN|Gênesis]] · [[KJA-01-GEN-002|Gênesis 2 →]]\n"
-        "\n"
         "1. No princípio... ^kja-gen-1-1\n"
         "2. E a terra... ^kja-gen-1-2\n"
     )
     assert (out / "1-OT-Law" / "KJA-01-GEN" / "KJA-01-GEN-002.md").read_text(encoding="utf-8") == (
         "# Gênesis 2\n"
         "\n"
-        "[[KJA-01-GEN-001|← Gênesis 1]] · [[KJA-01-GEN|Gênesis]] "
-        "· [[KJA-20-PRO-001|Provérbios 1 →]]\n"
-        "\n"
         "1. Assim foram... ^kja-gen-2-1\n"
     )
 
 
-def test_book_folder_note_indexes_every_chapter(tmp_path: Path):
+def test_a_chapter_carries_no_links_to_its_neighbours(tmp_path: Path):
+    """The plugin derives the neighbours from the file names; the export need not."""
     out = tmp_path / "KJA"
     MarkdownExporter().export(_bible(), out)
-    assert (out / "1-OT-Law" / "KJA-01-GEN"
-            / "KJA-01-GEN.md").read_text(encoding="utf-8") == (
-        "# Gênesis\n"
-        "\n"
-        "| [[KJA-01-GEN-001\\|1]] | [[KJA-01-GEN-002\\|2]] |\n"
-        "|:-:|:-:|\n"
-    )
-
-
-def test_folder_note_lists_chapters_in_order_whatever_the_source_gave(tmp_path: Path):
-    """Chapter file names sort by their zero-padded number; the index must too."""
-    bible = Bible(
-        meta=BibleMeta(code="KJA", name="n", license="copyright", scope="full", source="t"),
-        books=[Book(id=1, code="GEN", name="Gênesis", abbrev="Gn", chapters=[
-            Chapter(number=n, verses=[Verse(number=1, text="t")]) for n in (10, 1, 2)
-        ])],
-    )
-    out = tmp_path / "KJA"
-    MarkdownExporter().export(bible, out)
-    note = (out / "1-OT-Law" / "KJA-01-GEN"
-            / "KJA-01-GEN.md").read_text(encoding="utf-8")
-    assert note.splitlines()[2:] == [
-        "| [[KJA-01-GEN-001\\|1]] | [[KJA-01-GEN-002\\|2]] | [[KJA-01-GEN-010\\|10]] |",
-        "|:-:|:-:|:-:|",
-    ]
-
-
-def _cells(row: str) -> list[str]:
-    """Split a table row on its real cell borders, not the escaped ones."""
-    return re.split(r"(?<!\\)\|", row)[1:-1]
-
-
-def test_folder_note_wraps_every_ten_chapters(tmp_path: Path):
-    """Salmos must be a 15-row grid, not a 150-item list you scroll through."""
-    bible = Bible(
-        meta=BibleMeta(code="KJA", name="n", license="copyright", scope="full", source="t"),
-        books=[Book(id=19, code="PSA", name="Salmos", abbrev="Sl", chapters=[
-            Chapter(number=n, verses=[Verse(number=1, text="t")]) for n in range(1, 151)
-        ])],
-    )
-    out = tmp_path / "KJA"
-    MarkdownExporter().export(bible, out)
-    lines = (out / "3-OT-Wisdom" / "KJA-19-PSA"
-             / "KJA-19-PSA.md").read_text(encoding="utf-8").splitlines()
-    header, delimiter, body = lines[2], lines[3], lines[4:]
-    assert header.startswith("| [[KJA-19-PSA-001\\|1]] |")
-    assert header.endswith("| [[KJA-19-PSA-010\\|10]] |")
-    assert delimiter == "|" + ":-:|" * 10
-    assert len(body) == 14  # 15 rows of ten, the first of them the header
-    assert body[-1].startswith("| [[KJA-19-PSA-141\\|141]] |")
-    assert all(len(_cells(row)) == 10 for row in [header, *body])
-
-
-def test_folder_note_pads_a_short_last_row(tmp_path: Path):
-    """Every row carries ten cells, so the grid stays rectangular."""
-    bible = Bible(
-        meta=BibleMeta(code="KJA", name="n", license="copyright", scope="full", source="t"),
-        books=[Book(id=1, code="GEN", name="Gênesis", abbrev="Gn", chapters=[
-            Chapter(number=n, verses=[Verse(number=1, text="t")]) for n in range(1, 13)
-        ])],
-    )
-    out = tmp_path / "KJA"
-    MarkdownExporter().export(bible, out)
-    rows = (out / "1-OT-Law" / "KJA-01-GEN"
-            / "KJA-01-GEN.md").read_text(encoding="utf-8").splitlines()[4:]
-    assert len(rows) == 1
-    assert rows[0] == ("| [[KJA-01-GEN-011\\|11]] | [[KJA-01-GEN-012\\|12]] "
-                       "|  |  |  |  |  |  |  |  |")
-
-
-def test_folder_note_of_a_one_chapter_book_is_a_single_cell(tmp_path: Path):
-    """Obadias should not render nine empty cells to reach ten columns."""
-    bible = Bible(
-        meta=BibleMeta(code="KJA", name="n", license="copyright", scope="full", source="t"),
-        books=[Book(id=31, code="OBA", name="Obadias", abbrev="Ob", chapters=[
-            Chapter(number=1, verses=[Verse(number=1, text="t")]),
-        ])],
-    )
-    out = tmp_path / "KJA"
-    MarkdownExporter().export(bible, out)
-    assert (out / "4-OT-Prophets" / "KJA-31-OBA"
-            / "KJA-31-OBA.md").read_text(encoding="utf-8") == (
-        "# Obadias\n"
-        "\n"
-        "| [[KJA-31-OBA-001\\|1]] |\n"
-        "|:-:|\n"
-    )
-
-
-def test_folder_note_is_named_after_its_folder():
-    """Obsidian only treats the note as the folder's index when the names match."""
-    for ref in books.BOOKS:
-        book = _ref_book(ref)
-        assert _book_note_filename("ARA", book) == f"{_book_dirname('ARA', book)}.md"
-        assert _book_note_filename("ARA", book).isascii(), ref.name
-
-
-def test_folder_notes_of_two_versions_do_not_collide():
-    """The prefix is what keeps both translations' Genesis notes distinct."""
-    book = _ref_book(books.by_code("GEN"))
-    assert _book_note_filename("ARA", book) == "ARA-01-GEN.md"
-    assert _book_note_filename("NVI", book) == "NVI-01-GEN.md"
+    body = (out / "3-OT-Wisdom" / "KJA-20-PRO"
+            / "KJA-20-PRO-001.md").read_text(encoding="utf-8")
+    assert "[[" not in body
 
 
 def test_export_replaces_whatever_was_in_the_folder(tmp_path: Path):
@@ -206,7 +108,7 @@ def test_export_replaces_whatever_was_in_the_folder(tmp_path: Path):
     assert not old_dir.exists()
     assert sorted(p.name for p in (out / "1-OT-Law"
                                    / "KJA-01-GEN").iterdir()) == [
-        "KJA-01-GEN-001.md", "KJA-01-GEN-002.md", "KJA-01-GEN.md",
+        "KJA-01-GEN-001.md", "KJA-01-GEN-002.md",
     ]
 
 
@@ -214,27 +116,7 @@ def test_export_works_when_the_folder_does_not_exist_yet(tmp_path: Path):
     out = tmp_path / "nova" / "KJA"
     MarkdownExporter().export(_bible(), out)
     assert (out / "1-OT-Law" / "KJA-01-GEN"
-            / "KJA-01-GEN.md").exists()
-
-
-def test_chapter_nav_crosses_into_the_next_book(tmp_path: Path):
-    """The last chapter of a book points at the first of the one after it."""
-    out = tmp_path / "KJA"
-    MarkdownExporter().export(_bible(), out)
-    nav = (out / "3-OT-Wisdom" / "KJA-20-PRO"
-           / "KJA-20-PRO-001.md").read_text(encoding="utf-8").splitlines()[2]
-    assert nav == ("[[KJA-01-GEN-002|← Gênesis 2]] · [[KJA-20-PRO|Provérbios]]")
-
-
-def test_first_and_last_chapter_drop_the_link_they_have_no_neighbour_for(tmp_path: Path):
-    out = tmp_path / "KJA"
-    MarkdownExporter().export(_bible(), out)
-    first = (out / "1-OT-Law" / "KJA-01-GEN"
-             / "KJA-01-GEN-001.md").read_text(encoding="utf-8").splitlines()[2]
-    last = (out / "3-OT-Wisdom" / "KJA-20-PRO"
-            / "KJA-20-PRO-001.md").read_text(encoding="utf-8").splitlines()[2]
-    assert "←" not in first
-    assert "→" not in last
+            / "KJA-01-GEN-001.md").exists()
 
 
 def test_verse_text_is_flattened_to_one_line(tmp_path: Path):
