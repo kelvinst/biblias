@@ -1,58 +1,49 @@
 import shutil
-import unicodedata
 from pathlib import Path
 
-import books
 from model import Bible, Book, Chapter
-
-
-def _strip_accents(text: str) -> str:
-    decomposed = unicodedata.normalize("NFKD", text)
-    return "".join(c for c in decomposed if not unicodedata.combining(c))
-
-
-_TESTAMENT_DIRS = {"OT": "1-Antigo Testamento", "NT": "2-Novo Testamento"}
 
 # Chapters per row in a book's index table. Ten keeps Salmos at 15 rows, so any
 # chapter is one glance away instead of a scroll down a 150-item list.
 _NOTE_COLUMNS = 10
 
 # (last book id in the category, folder name). Every category is a contiguous
-# id range, so the first entry a book fits under is its category.
+# id range, so the first entry a book fits under is its category. The testament
+# is a prefix rather than a folder of its own: eight entries read at a glance,
+# and every path is a level shorter for it. Numbered straight through both
+# testaments so they sort in canon order, and English, like the USFM codes
+# below them -- a path names nothing in the version's own language, only the
+# note bodies do.
 _CATEGORY_DIRS: tuple[tuple[int, str], ...] = (
-    (5, "1-Lei"),               # Gênesis..Deuteronômio
-    (17, "2-História"),         # Josué..Ester
-    (22, "3-Sabedoria"),        # Jó..Cânticos
-    (39, "4-Profetas"),         # Isaías..Malaquias
-    (43, "1-Evangelhos"),       # Mateus..João
-    (44, "2-História"),         # Atos
-    (65, "3-Cartas"),           # Romanos..Judas
-    (66, "4-Profecia"),         # Apocalipse
+    (5, "1-OT-Law"),            # Gênesis..Deuteronômio
+    (17, "2-OT-History"),       # Josué..Ester
+    (22, "3-OT-Wisdom"),        # Jó..Cânticos
+    (39, "4-OT-Prophets"),      # Isaías..Malaquias
+    (43, "5-NT-Gospels"),       # Mateus..João
+    (44, "6-NT-History"),       # Atos
+    (65, "7-NT-Letters"),       # Romanos..Judas
+    (66, "8-NT-Prophecy"),      # Apocalipse
 )
 
 
-def _testament_dirname(book: Book) -> str:
-    """``1-Antigo Testamento``: numbered so the two sort in canonical order."""
-    return _TESTAMENT_DIRS[books.by_id(book.id).testament]
-
-
 def _category_dirname(book: Book) -> str:
-    """``1-Lei``: numbered within its testament so the categories stay in order."""
-    return next(_strip_accents(name) for last_id, name in _CATEGORY_DIRS
-                if book.id <= last_id)
+    """``1-OT-Law``: numbered across both testaments, so they sort in canon order."""
+    return next(name for last_id, name in _CATEGORY_DIRS if book.id <= last_id)
 
 
 def _book_dirname(code: str, book: Book) -> str:
-    """``ARA-01-Genesis``: zero-padded id so lexical order matches canon order.
+    """``ARA-01-GEN``: zero-padded id so lexical order matches canon order.
 
-    Version-qualified like the files inside it, because its folder note has to
-    carry the same name -- see :func:`_book_note_filename`.
+    The USFM code, not the version's own name for the book, so the folder is
+    spelled the same in every translation and needs no accents stripped out of
+    it. Version-qualified like the files inside it, because its folder note has
+    to carry the same name -- see :func:`_book_note_filename`.
     """
-    return f"{code}-{book.id:02d}-{_strip_accents(book.name)}"
+    return f"{code}-{book.id:02d}-{book.code}"
 
 
 def _book_note_filename(code: str, book: Book) -> str:
-    """``ARA-01-Genesis.md``: matches the folder name, as a folder note must.
+    """``ARA-01-GEN.md``: matches the folder name, as a folder note must.
 
     Obsidian only folds the note into the folder when the two names are equal,
     so the folder carries the version prefix that keeps this note unique in a
@@ -62,7 +53,7 @@ def _book_note_filename(code: str, book: Book) -> str:
 
 
 def _book_dir(path: Path, code: str, book: Book) -> Path:
-    return path / _testament_dirname(book) / _category_dirname(book) / _book_dirname(code, book)
+    return path / _category_dirname(book) / _book_dirname(code, book)
 
 
 def _chapter_filename(code: str, book: Book, chapter: Chapter) -> str:
@@ -77,15 +68,15 @@ def _chapter_filename(code: str, book: Book, chapter: Chapter) -> str:
 class MarkdownExporter:
     """Writes one Markdown file per chapter, grouped in a folder per book.
 
-    Layout is ``<version>/1-Antigo Testamento/1-Lei/ARA-01-Genesis/
-    ARA-01-GEN-001.md``, with an ``ARA-01-Genesis.md`` folder note beside the
-    chapters indexing them. Testament, category, book and chapter names are
-    numbered so Finder and Obsidian sort them in canonical order, accents are
-    stripped, and the version prefix keeps the note unique in a vault holding
-    several translations. The chapter body is a plain Markdown ordered list --
-    no HTML -- one verse per line, each ending in a block id (``^acf-gen-1-1``)
-    so verses stay individually linkable; the id keeps using the USFM code, so
-    renaming files never invalidates a link.
+    Layout is ``<version>/1-OT-Law/ARA-01-GEN/ARA-01-GEN-001.md``, with an
+    ``ARA-01-GEN.md`` folder note beside the chapters indexing them. Category,
+    book and chapter names are numbered so Finder and Obsidian sort them in
+    canonical order, and spelled in English or as a USFM code, so a path is the
+    same in every version and carries no accents; the version prefix keeps the
+    note unique in a vault holding several translations. The chapter body is a
+    plain Markdown ordered list -- no HTML -- one verse per line, each ending in
+    a block id (``^acf-gen-1-1``) so verses stay individually linkable; the id
+    keeps using the USFM code, so renaming files never invalidates a link.
 
     Exporting replaces the version folder wholesale, so a rename never leaves
     the previous layout sitting beside the new one.
