@@ -187,10 +187,10 @@ _EXPECTED_CATEGORIES = {
                       "MIC", "NAM", "HAB", "ZEP", "HAG", "ZEC", "MAL"],
     "5-NT-Gospels": ["MAT", "MRK", "LUK", "JHN"],
     "6-NT-History": ["ACT"],
-    "7-NT-Letters": ["ROM", "1CO", "2CO", "GAL", "EPH", "PHP", "COL", "1TH", "2TH", "1TI",
-                     "2TI", "TIT", "PHM", "HEB", "JAS", "1PE", "2PE", "1JN", "2JN", "3JN",
-                     "JUD"],
-    "8-NT-Prophecy": ["REV"],
+    "7-NT-Pauline-Epistles": ["ROM", "1CO", "2CO", "GAL", "EPH", "PHP", "COL", "1TH", "2TH",
+                              "1TI", "2TI", "TIT", "PHM"],
+    "8-NT-General-Epistles": ["HEB", "JAS", "1PE", "2PE", "1JN", "2JN", "3JN", "JUD"],
+    "9-NT-Prophecy": ["REV"],
 }
 
 
