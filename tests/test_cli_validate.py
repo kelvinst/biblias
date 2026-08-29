@@ -49,3 +49,23 @@ def test_validate_accepts_version_list(tmp_path: Path, monkeypatch):
     assert (work_dir / "A.md").exists()
     assert (work_dir / "KJA.md").exists()
     assert not (work_dir / "B.md").exists()
+
+
+def test_subset_worklist_matches_a_full_run(tmp_path: Path, monkeypatch):
+    canon_dir = tmp_path / "canonical"
+    full_dir = tmp_path / "worklist-full"
+    subset_dir = tmp_path / "worklist-subset"
+    full = "As mãos preguiçosas empobrecem o ser humano, porém as laboriosas enriquecem."
+    _save("A", full, canon_dir)
+    _save("B", full, canon_dir)
+    _save("KJA", "As mãos preguiçosas lhe", canon_dir)
+    monkeypatch.setattr(cli, "CANON_DIR", canon_dir)
+
+    monkeypatch.setattr(cli, "WORKLIST_DIR", full_dir)
+    assert runner.invoke(cli.app, ["validate"]).exit_code == 0
+
+    monkeypatch.setattr(cli, "WORKLIST_DIR", subset_dir)
+    assert runner.invoke(cli.app, ["validate", "KJA"]).exit_code == 0
+
+    assert (subset_dir / "KJA.md").read_bytes() == (full_dir / "KJA.md").read_bytes()
+    assert "high (1)" in (subset_dir / "KJA.md").read_text(encoding="utf-8")
