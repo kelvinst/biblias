@@ -5,20 +5,21 @@ from model import Bible, BibleMeta, Book, Chapter
 
 # (last book id in the category, folder name). Every category is a contiguous
 # id range, so the first entry a book fits under is its category. The testament
-# is a prefix rather than a folder of its own: eight entries read at a glance,
+# is a prefix rather than a folder of its own: nine entries read at a glance,
 # and every path is a level shorter for it. Numbered straight through both
 # testaments so they sort in canon order, and English, like the USFM codes
 # below them -- a path names nothing in the version's own language, only the
 # note bodies do.
 _CATEGORY_DIRS: tuple[tuple[int, str], ...] = (
-    (5, "1-OT-Law"),            # Gênesis..Deuteronômio
-    (17, "2-OT-History"),       # Josué..Ester
-    (22, "3-OT-Wisdom"),        # Jó..Cânticos
-    (39, "4-OT-Prophets"),      # Isaías..Malaquias
-    (43, "5-NT-Gospels"),       # Mateus..João
-    (44, "6-NT-History"),       # Atos
-    (65, "7-NT-Letters"),       # Romanos..Judas
-    (66, "8-NT-Prophecy"),      # Apocalipse
+    (5, "1-OT-Law"),                # Gênesis..Deuteronômio
+    (17, "2-OT-History"),           # Josué..Ester
+    (22, "3-OT-Wisdom"),            # Jó..Cânticos
+    (39, "4-OT-Prophets"),          # Isaías..Malaquias
+    (43, "5-NT-Gospels"),           # Mateus..João
+    (44, "6-NT-History"),           # Atos
+    (57, "7-NT-Pauline-Epistles"),  # Romanos..Filemom
+    (65, "8-NT-General-Epistles"),  # Hebreus..Judas
+    (66, "9-NT-Prophecy"),          # Apocalipse
 )
 
 
