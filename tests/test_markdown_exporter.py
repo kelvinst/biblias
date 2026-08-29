@@ -12,8 +12,9 @@ from model import Bible, BibleMeta, Book, Chapter, Verse
 
 def _bible() -> Bible:
     return Bible(
-        meta=BibleMeta(code="KJA", name="King James Atualizada", license="copyright",
-                       scope="full", source="t"),
+        meta=BibleMeta(code="KJA", name="King James Atualizada", year=1999,
+                       publisher="Abba Press", license="copyright", scope="full",
+                       source="openlp_sqlite"),
         books=[
             Book(id=1, code="GEN", name="Gênesis", abbrev="Gn", chapters=[
                 Chapter(number=1, verses=[Verse(number=1, text="No princípio..."),
@@ -30,7 +31,7 @@ def _bible() -> Bible:
 def test_export_groups_books_under_a_category_folder(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(_bible(), out)
-    assert sorted(p.name for p in out.iterdir()) == ["1-OT-Law", "3-OT-Wisdom"]
+    assert sorted(p.name for p in out.iterdir()) == ["1-OT-Law", "3-OT-Wisdom", "KJA.md"]
 
 
 def test_new_testament_books_land_in_their_own_category(tmp_path: Path):
@@ -63,11 +64,81 @@ def test_export_writes_a_file_per_chapter(tmp_path: Path):
     ]
 
 
-def test_export_writes_nothing_but_the_chapters(tmp_path: Path):
+def test_export_writes_no_index_for_a_book(tmp_path: Path):
     """The book index is navigation, and an Obsidian plugin builds that itself."""
     out = tmp_path / "KJA"
     MarkdownExporter().export(_bible(), out)
     assert not (out / "1-OT-Law" / "KJA-01-GEN" / "KJA-01-GEN.md").exists()
+
+
+def test_the_folder_note_is_named_after_the_version_folder(tmp_path: Path):
+    """Obsidian binds a folder note to its folder by the name they share."""
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(_bible(), out)
+    assert (out / "KJA.md").exists()
+
+
+def test_the_folder_note_carries_the_version_metadata(tmp_path: Path):
+    """The one place the licence, the publisher and the full title survive."""
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(_bible(), out)
+    assert (out / "KJA.md").read_text(encoding="utf-8") == (
+        "---\n"
+        'code: "KJA"\n'
+        'name: "King James Atualizada"\n'
+        "year: 1999\n"
+        'publisher: "Abba Press"\n'
+        'license: "copyright"\n'
+        'scope: "full"\n'
+        'source: "openlp_sqlite"\n'
+        "---\n"
+        "\n"
+        "# King James Atualizada\n"
+        "\n"
+        "| # | Código | Livro | Abreviação |\n"
+        "| --: | --- | --- | --- |\n"
+        "| 1 | GEN | Gênesis | Gn |\n"
+        "| 20 | PRO | Provérbios | Pv |\n"
+    )
+
+
+def test_the_book_table_is_the_only_place_the_abbreviation_survives(tmp_path: Path):
+    """Nothing else in the export spells a book the version's own short way."""
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(_bible(), out)
+    assert "| 20 | PRO | Provérbios | Pv |" in (out / "KJA.md").read_text(encoding="utf-8")
+
+
+def test_a_missing_property_is_written_blank_rather_than_dropped(tmp_path: Path):
+    """The property exists in every version's note, so a query can find the gap."""
+    bible = Bible(
+        meta=BibleMeta(code="NVI", name="Nova Versão Internacional", license="copyright",
+                       scope="full", source="openlp_sqlite"),
+        books=[],
+    )
+    out = tmp_path / "NVI"
+    MarkdownExporter().export(bible, out)
+    body = (out / "NVI.md").read_text(encoding="utf-8")
+    assert "\nyear:\n" in body
+    assert "\npublisher:\n" in body
+
+
+def test_the_folder_note_carries_no_links(tmp_path: Path):
+    """The book table is data; listing the chapters would be navigation."""
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(_bible(), out)
+    assert "[[" not in (out / "KJA.md").read_text(encoding="utf-8")
+
+
+def test_a_quote_in_a_property_is_escaped(tmp_path: Path):
+    bible = Bible(
+        meta=BibleMeta(code="XX", name='Bíblia "Aspas"', license="copyright",
+                       scope="full", source="t"),
+        books=[],
+    )
+    out = tmp_path / "XX"
+    MarkdownExporter().export(bible, out)
+    assert 'name: "Bíblia \\"Aspas\\""' in (out / "XX.md").read_text(encoding="utf-8")
 
 
 def test_chapter_file_shape(tmp_path: Path):

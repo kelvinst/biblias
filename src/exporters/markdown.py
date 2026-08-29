@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
 
-from model import Bible, Book, Chapter
+from model import Bible, BibleMeta, Book, Chapter
 
 # (last book id in the category, folder name). Every category is a contiguous
 # id range, so the first entry a book fits under is its category. The testament
@@ -42,6 +42,23 @@ def _book_dir(path: Path, code: str, book: Book) -> Path:
     return path / _category_dirname(book) / _book_dirname(code, book)
 
 
+def _folder_note_filename(code: str) -> str:
+    """``ARA.md``: named after the folder holding it, which is how Obsidian's
+    folder-note convention binds a note to its folder. ``output_path`` names the
+    version folder after the code, so the two always agree."""
+    return f"{code}.md"
+
+
+def _yaml_scalar(value: str | int | None) -> str:
+    """A frontmatter value. ``None`` becomes an empty one, so the property still
+    exists in every version's note and a query can tell blank from absent."""
+    if value is None:
+        return ""
+    if isinstance(value, int):
+        return str(value)
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
 def _chapter_filename(code: str, book: Book, chapter: Chapter) -> str:
     """``ARA-01-GEN-001.md``: version-qualified, so it is unique across a vault.
 
@@ -63,9 +80,15 @@ class MarkdownExporter:
     a block id (``^acf-gen-1-1``) so verses stay individually linkable; the id
     keeps using the USFM code, so renaming files never invalidates a link.
 
-    Nothing but the chapters is written: the index of a book and the links from
-    a chapter to its neighbours are navigation, and an Obsidian plugin builds
-    those from the file names, so they need not be baked into the export.
+    Beside them sits one folder note per version, ``ARA/ARA.md``, carrying
+    everything about the version that the file names cannot: its full title,
+    year, publisher, licence, scope and source as frontmatter properties, and
+    the books it holds as a table -- the only place the version's own
+    abbreviation for a book (``Gn``) survives the export.
+
+    Nothing else is written: the index of a book and the links from a chapter to
+    its neighbours are navigation, and an Obsidian plugin builds those from the
+    file names, so they need not be baked into the export.
 
     Exporting replaces the version folder wholesale, so a rename never leaves
     the previous layout sitting beside the new one.
@@ -83,6 +106,10 @@ class MarkdownExporter:
         except FileNotFoundError:
             pass
         code = bible.meta.code
+        path.mkdir(parents=True, exist_ok=True)
+        (path / _folder_note_filename(code)).write_text(
+            self._render_folder_note(bible), encoding="utf-8"
+        )
         for book in bible.books:
             book_dir = _book_dir(path, code, book)
             book_dir.mkdir(parents=True, exist_ok=True)
@@ -90,6 +117,27 @@ class MarkdownExporter:
                 (book_dir / _chapter_filename(code, book, chapter)).write_text(
                     self._render_chapter(book, chapter, code), encoding="utf-8"
                 )
+
+    def _render_folder_note(self, bible: Bible) -> str:
+        meta = bible.meta
+        lines = ["---"]
+        lines += [f"{key}: {_yaml_scalar(value)}".rstrip()
+                  for key, value in self._properties(meta)]
+        lines += ["---", "", f"# {meta.name}", "",
+                  "| # | Código | Livro | Abreviação |",
+                  "| --: | --- | --- | --- |"]
+        lines += [f"| {book.id} | {book.code} | {book.name} | {book.abbrev} |"
+                  for book in bible.books]
+        return "\n".join(lines) + "\n"
+
+    def _properties(self, meta: BibleMeta) -> tuple[tuple[str, str | int | None], ...]:
+        """The canonical metadata, keyed the way ``BibleMeta`` and the JSON export
+        already key it. The bodies of these notes are Portuguese, but a property
+        name is queried, not read, and a query written against one version's vault
+        should keep working against the JSON the vault was built from."""
+        return (("code", meta.code), ("name", meta.name), ("year", meta.year),
+                ("publisher", meta.publisher), ("license", meta.license),
+                ("scope", meta.scope), ("source", meta.source))
 
     def _render_chapter(self, book: Book, chapter: Chapter, code: str) -> str:
         lines = [f"# {book.name} {chapter.number}", ""]
