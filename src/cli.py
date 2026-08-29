@@ -18,6 +18,30 @@ CORRECTIONS_DIR = Path("data/corrections")
 WORKLIST_DIR = Path("data/worklist")
 
 
+def canonical_codes() -> list[str]:
+    """Versões presentes no canônico, em ordem alfabética."""
+    if not CANON_DIR.exists():
+        return []
+    return sorted(p.name for p in CANON_DIR.iterdir() if (p / "meta.json").exists())
+
+
+def resolve_codes(code: str | None) -> list[str]:
+    """Resolve o argumento de versão: vazio ou `all` = todas; senão, lista por vírgula."""
+    if code is None or code.strip().lower() == "all":
+        codes = canonical_codes()
+        if not codes:
+            raise typer.BadParameter(f"Nenhuma versão no canônico ({CANON_DIR}).")
+        return codes
+    codes = [c.strip() for c in code.split(",") if c.strip()]
+    if not codes:
+        raise typer.BadParameter("Nenhuma versão informada.")
+    available = canonical_codes()
+    unknown = [c for c in codes if c not in available]
+    if unknown:
+        raise typer.BadParameter(f"Sem canônico para: {', '.join(unknown)}.")
+    return codes
+
+
 @app.command()
 def fetch(code: str, source: str = "openlp", force: bool = False) -> None:
     """Busca uma versão de uma fonte e grava no canônico."""
@@ -33,16 +57,24 @@ def fetch(code: str, source: str = "openlp", force: bool = False) -> None:
 
 
 @app.command()
-def build(code: str, format: str = "zefania", out: Path = Path("dist")) -> None:
-    """Gera um ou mais formatos de saída a partir do canônico."""
+def build(
+    code: str | None = typer.Argument(None, help="Versão, lista separada por vírgula, ou `all`."),
+    format: str = "zefania",
+    out: Path = Path("dist"),
+) -> None:
+    """Gera um ou mais formatos de saída a partir do canônico.
+
+    Sem argumento (ou com `all`), gera todas as versões do canônico.
+    """
     formats = [f.strip() for f in format.split(",") if f.strip()]
     for fmt in formats:
         if fmt not in EXTENSIONS:
             raise typer.BadParameter(f"Formato desconhecido: {fmt}")
-    bible = canon.load_bible(code, CANON_DIR)
-    for fmt in formats:
-        make_exporter(fmt).export(bible, output_path(fmt, out, code))
-    typer.echo(f"{code}: {', '.join(formats)} gerado(s) em {out}.")
+    for version in resolve_codes(code):
+        bible = canon.load_bible(version, CANON_DIR)
+        for fmt in formats:
+            make_exporter(fmt).export(bible, output_path(fmt, out, version))
+        typer.echo(f"{version}: {', '.join(formats)} gerado(s) em {out}.")
 
 
 @app.command(name="diff-sources")
@@ -60,12 +92,14 @@ def diff_sources(code: str, sources: str = "bolls,getbible") -> None:
 
 
 @app.command()
-def validate(code: str | None = typer.Argument(None)) -> None:
-    """Valida o canônico e grava worklists por versão."""
-    codes = [code] if code else sorted(
-        p.name for p in CANON_DIR.iterdir() if (p / "meta.json").exists()
-    )
-    bibles = [canon.load_bible(c, CANON_DIR) for c in codes]
+def validate(
+    code: str | None = typer.Argument(None, help="Versão, lista separada por vírgula, ou `all`."),
+) -> None:
+    """Valida o canônico e grava worklists por versão.
+
+    Sem argumento (ou com `all`), valida todas as versões do canônico.
+    """
+    bibles = [canon.load_bible(c, CANON_DIR) for c in resolve_codes(code)]
     cross = validate_mod.cross_version_findings(bibles)
     for bible in bibles:
         single = validate_mod.validate_bible(bible)

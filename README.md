@@ -62,9 +62,12 @@ Toolkit em Python (com [uv](https://docs.astral.sh/uv/)). Os formatos saem do ca
 ```bash
 uv sync
 uv run biblias fetch KJA --source bolls   # fonte → canônico
-uv run biblias validate                   # valida e gera as worklists
+uv run biblias validate                   # valida e gera as worklists (todas as versões)
+uv run biblias validate ACF,ARA           # valida só as versões da lista
 uv run biblias diff-sources NTLH          # compara fontes
 uv run biblias build KJA --format zefania,sqlite,json,markdown --out dist
+uv run biblias build ACF,ARA --out dist   # lista de versões, separadas por vírgula
+uv run biblias build all --out dist       # todas as versões do canônico (igual a omitir)
 ```
 
 Fontes: `openlp` (SQLite local), `bolls`, `getbible`.

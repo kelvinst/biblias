@@ -32,3 +32,20 @@ def test_validate_writes_worklists(tmp_path: Path, monkeypatch):
     assert result.exit_code == 0
     assert (work_dir / "KJA.md").exists()
     assert "high (1)" in (work_dir / "KJA.md").read_text(encoding="utf-8")
+
+
+def test_validate_accepts_version_list(tmp_path: Path, monkeypatch):
+    canon_dir = tmp_path / "canonical"
+    work_dir = tmp_path / "worklist"
+    full = "As mãos preguiçosas empobrecem o ser humano, porém as laboriosas enriquecem."
+    _save("A", full, canon_dir)
+    _save("B", full, canon_dir)
+    _save("KJA", "As mãos preguiçosas lhe", canon_dir)
+    monkeypatch.setattr(cli, "CANON_DIR", canon_dir)
+    monkeypatch.setattr(cli, "WORKLIST_DIR", work_dir)
+
+    result = runner.invoke(cli.app, ["validate", "A,KJA"])
+    assert result.exit_code == 0
+    assert (work_dir / "A.md").exists()
+    assert (work_dir / "KJA.md").exists()
+    assert not (work_dir / "B.md").exists()

@@ -28,13 +28,7 @@ jobs:
         run: uv run biblias validate || true
 
       - name: Build every version (zefania, sqlite, json, markdown)
-        run: |
-          mkdir -p dist
-          shopt -s nullglob
-          for dir in data/canonical/*/; do
-            code="$(basename "$dir")"
-            uv run biblias build "$code" --format zefania,sqlite,json,markdown --out dist
-          done
+        run: uv run biblias build all --format zefania,sqlite,json,markdown --out dist
 
       - name: Package
         run: |
