@@ -147,3 +147,31 @@ def test_build_without_canonical_fails(tmp_path: Path, monkeypatch):
     monkeypatch.setattr(cli, "CANON_DIR", tmp_path / "data" / "canonical")
     r = runner.invoke(cli.app, ["build", "--out", str(tmp_path / "dist")])
     assert r.exit_code != 0
+
+
+def test_build_rejects_canonical_without_meta(tmp_path: Path, monkeypatch):
+    sql_dir = tmp_path / "inst" / "sql"
+    sql_dir.mkdir(parents=True)
+    _make_db(sql_dir / "KJA.sqlite")
+    canon_dir = tmp_path / "data" / "canonical"
+    monkeypatch.setattr(cli, "SQL_DIR", sql_dir)
+    monkeypatch.setattr(cli, "CANON_DIR", canon_dir)
+    monkeypatch.setattr(cli, "CORRECTIONS_DIR", tmp_path / "data" / "corrections")
+
+    runner.invoke(cli.app, ["fetch", "KJA"])
+    half = canon_dir / "XYZ"
+    half.mkdir()
+    (half / "PRO.json").write_text("{}")
+
+    r = runner.invoke(cli.app, ["build", "--out", str(tmp_path / "dist")])
+    assert r.exit_code != 0
+    assert "XYZ" in r.output
+
+    named = runner.invoke(cli.app, ["build", "XYZ", "--out", str(tmp_path / "dist")])
+    assert named.exit_code != 0
+    assert "XYZ" in named.output
+
+    # A half-written version is not a reason to refuse the ones that are whole.
+    other = runner.invoke(cli.app, ["build", "KJA", "--out", str(tmp_path / "dist")])
+    assert other.exit_code == 0
+    assert (tmp_path / "dist" / "KJA.xml").exists()

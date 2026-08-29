@@ -25,9 +25,34 @@ def canonical_codes() -> list[str]:
     return sorted(p.name for p in CANON_DIR.iterdir() if (p / "meta.json").exists())
 
 
+def incomplete_codes(codes: list[str] | None = None) -> list[str]:
+    """Versões pela metade: pasta com livros, mas sem `meta.json`.
+
+    `codes` limita a busca; sem ele, varre o canônico inteiro.
+    """
+    if not CANON_DIR.exists():
+        return []
+    dirs = [p for p in CANON_DIR.iterdir() if p.is_dir()]
+    if codes is not None:
+        wanted = set(codes)
+        dirs = [p for p in dirs if p.name in wanted]
+    return sorted(p.name for p in dirs
+                  if not (p / "meta.json").exists() and any(p.glob("*.json")))
+
+
+def _incomplete_error(codes: list[str]) -> typer.BadParameter:
+    return typer.BadParameter(f"Canônico incompleto (sem meta.json): {', '.join(codes)}.")
+
+
 def resolve_codes(code: str | None) -> list[str]:
     """Resolve o argumento de versão: vazio ou `all` = todas; senão, lista por vírgula."""
     if code is None or code.strip().lower() == "all":
+        # Uma versão pela metade sairia da build sem ninguém notar: falha nomeando-a.
+        # A checagem fica aqui, e não na listagem, para não derrubar quem pediu outra
+        # versão pelo nome.
+        half = incomplete_codes()
+        if half:
+            raise _incomplete_error(half)
         codes = canonical_codes()
         if not codes:
             raise typer.BadParameter(f"Nenhuma versão no canônico ({CANON_DIR}).")
@@ -38,6 +63,9 @@ def resolve_codes(code: str | None) -> list[str]:
     available = canonical_codes()
     unknown = [c for c in codes if c not in available]
     if unknown:
+        half = incomplete_codes(unknown)
+        if half:
+            raise _incomplete_error(half)
         raise typer.BadParameter(f"Sem canônico para: {', '.join(unknown)}.")
     return codes
 
@@ -99,9 +127,15 @@ def validate(
 
     Sem argumento (ou com `all`), valida todas as versões do canônico.
     """
-    bibles = [canon.load_bible(c, CANON_DIR) for c in resolve_codes(code)]
-    cross = validate_mod.cross_version_findings(bibles)
-    for bible in bibles:
+    reported = set(resolve_codes(code))
+    # The cross-version pass compares each verse against the other versions, so it needs
+    # the whole corpus even when only a subset is reported: narrowing it would write
+    # worklists poorer than a full run.
+    corpus = [canon.load_bible(c, CANON_DIR) for c in canonical_codes()]
+    cross = validate_mod.cross_version_findings(corpus)
+    for bible in corpus:
+        if bible.meta.code not in reported:
+            continue
         single = validate_mod.validate_bible(bible)
         merged = Report(code=bible.meta.code,
                         findings=single.findings + cross.get(bible.meta.code, []))
