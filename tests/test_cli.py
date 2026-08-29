@@ -81,3 +81,69 @@ def test_build_multiple_formats(tmp_path: Path, monkeypatch):
     assert (dist_dir / "KJA.json").exists()
     assert (dist_dir / "KJA" / "3-OT-Wisdom" / "KJA-20-PRO"
             / "KJA-20-PRO-010.md").exists()
+
+
+def test_build_all_versions(tmp_path: Path, monkeypatch):
+    sql_dir = tmp_path / "inst" / "sql"
+    sql_dir.mkdir(parents=True)
+    _make_db(sql_dir / "KJA.sqlite")
+    _make_db(sql_dir / "NVI.sqlite")
+    canon_dir = tmp_path / "data" / "canonical"
+    dist_dir = tmp_path / "dist"
+    monkeypatch.setattr(cli, "SQL_DIR", sql_dir)
+    monkeypatch.setattr(cli, "CANON_DIR", canon_dir)
+    monkeypatch.setattr(cli, "CORRECTIONS_DIR", tmp_path / "data" / "corrections")
+
+    runner.invoke(cli.app, ["fetch", "KJA"])
+    runner.invoke(cli.app, ["fetch", "NVI"])
+
+    r = runner.invoke(cli.app, ["build", "--out", str(dist_dir)])
+    assert r.exit_code == 0
+    assert (dist_dir / "KJA.xml").exists()
+    assert (dist_dir / "NVI.xml").exists()
+
+    explicit = runner.invoke(cli.app, ["build", "all", "--out", str(tmp_path / "dist2")])
+    assert explicit.exit_code == 0
+    assert (tmp_path / "dist2" / "KJA.xml").exists()
+    assert (tmp_path / "dist2" / "NVI.xml").exists()
+
+
+def test_build_version_list(tmp_path: Path, monkeypatch):
+    sql_dir = tmp_path / "inst" / "sql"
+    sql_dir.mkdir(parents=True)
+    for code in ("KJA", "NVI", "ACF"):
+        _make_db(sql_dir / f"{code}.sqlite")
+    canon_dir = tmp_path / "data" / "canonical"
+    dist_dir = tmp_path / "dist"
+    monkeypatch.setattr(cli, "SQL_DIR", sql_dir)
+    monkeypatch.setattr(cli, "CANON_DIR", canon_dir)
+    monkeypatch.setattr(cli, "CORRECTIONS_DIR", tmp_path / "data" / "corrections")
+
+    for code in ("KJA", "NVI", "ACF"):
+        runner.invoke(cli.app, ["fetch", code])
+
+    r = runner.invoke(cli.app, ["build", "KJA, NVI", "--out", str(dist_dir)])
+    assert r.exit_code == 0
+    assert (dist_dir / "KJA.xml").exists()
+    assert (dist_dir / "NVI.xml").exists()
+    assert not (dist_dir / "ACF.xml").exists()
+
+
+def test_build_rejects_unknown_version(tmp_path: Path, monkeypatch):
+    sql_dir = tmp_path / "inst" / "sql"
+    sql_dir.mkdir(parents=True)
+    _make_db(sql_dir / "KJA.sqlite")
+    canon_dir = tmp_path / "data" / "canonical"
+    monkeypatch.setattr(cli, "SQL_DIR", sql_dir)
+    monkeypatch.setattr(cli, "CANON_DIR", canon_dir)
+    monkeypatch.setattr(cli, "CORRECTIONS_DIR", tmp_path / "data" / "corrections")
+
+    runner.invoke(cli.app, ["fetch", "KJA"])
+    r = runner.invoke(cli.app, ["build", "KJA,NOPE", "--out", str(tmp_path / "dist")])
+    assert r.exit_code != 0
+
+
+def test_build_without_canonical_fails(tmp_path: Path, monkeypatch):
+    monkeypatch.setattr(cli, "CANON_DIR", tmp_path / "data" / "canonical")
+    r = runner.invoke(cli.app, ["build", "--out", str(tmp_path / "dist")])
+    assert r.exit_code != 0
