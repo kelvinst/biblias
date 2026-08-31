@@ -76,10 +76,11 @@ class MarkdownExporter:
     book and chapter names are numbered so Finder and Obsidian sort them in
     canonical order, and spelled in English or as a USFM code, so a path is the
     same in every version and carries no accents; the version prefix keeps the
-    note unique in a vault holding several translations. The chapter body is a
-    plain Markdown ordered list -- no HTML -- one verse per line, each ending in
-    a block id (``^acf-gen-1-1``) so verses stay individually linkable; the id
-    keeps using the USFM code, so renaming files never invalidates a link.
+    note unique in a vault holding several translations. The chapter body is one
+    verse per paragraph, the number in a ``<sup>`` tag rather than a list marker
+    so no indent eats into the line, each verse ending in a block id
+    (``^acf-gen-1-1``) so verses stay individually linkable; the id keeps using
+    the USFM code, so renaming files never invalidates a link.
 
     Beside them sits one folder note per version, ``ARA/ARA.md``, carrying
     everything about the version that the file names cannot: its full title,
@@ -145,5 +146,5 @@ class MarkdownExporter:
         for verse in chapter.verses:
             text = " ".join(verse.text.split())
             block_id = f"{code}-{book.code}-{chapter.number}-{verse.number}".lower()
-            lines.append(f"{verse.number}. {text} ^{block_id}")
-        return "\n".join(lines) + "\n"
+            lines += [f"<sup>{verse.number}</sup> {text} ^{block_id}", ""]
+        return "\n".join(lines)
