@@ -147,14 +147,14 @@ def test_chapter_file_shape(tmp_path: Path):
     assert (out / "1-OT-Law" / "KJA-01-GEN" / "KJA-01-GEN-001.md").read_text(encoding="utf-8") == (
         "# Gênesis 1\n"
         "\n"
-        "<sup>1</sup> No princípio... ^kja-gen-1-1\n"
+        "¹ No princípio... ^kja-gen-1-1\n"
         "\n"
-        "<sup>2</sup> E a terra... ^kja-gen-1-2\n"
+        "² E a terra... ^kja-gen-1-2\n"
     )
     assert (out / "1-OT-Law" / "KJA-01-GEN" / "KJA-01-GEN-002.md").read_text(encoding="utf-8") == (
         "# Gênesis 2\n"
         "\n"
-        "<sup>1</sup> Assim foram... ^kja-gen-2-1\n"
+        "¹ Assim foram... ^kja-gen-2-1\n"
     )
 
 
@@ -201,7 +201,21 @@ def test_verse_text_is_flattened_to_one_line(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(bible, out)
     body = (out / "1-OT-Law" / "KJA-01-GEN" / "KJA-01-GEN-001.md").read_text(encoding="utf-8")
-    assert "<sup>1</sup> linha um linha dois ^kja-gen-1-1" in body
+    assert "¹ linha um linha dois ^kja-gen-1-1" in body
+
+
+def test_a_multi_digit_verse_number_is_superscript_all_through(tmp_path: Path):
+    """Psalm 119 runs to 176; a half-raised number would read as two numbers."""
+    bible = Bible(
+        meta=BibleMeta(code="KJA", name="n", license="copyright", scope="full", source="t"),
+        books=[Book(id=1, code="GEN", name="Gênesis", abbrev="Gn", chapters=[
+            Chapter(number=1, verses=[Verse(number=176, text="texto")]),
+        ])],
+    )
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(bible, out)
+    body = (out / "1-OT-Law" / "KJA-01-GEN" / "KJA-01-GEN-001.md").read_text(encoding="utf-8")
+    assert "¹⁷⁶ texto ^kja-gen-1-176" in body
 
 
 def _ref_book(ref: books.BookRef) -> Book:
