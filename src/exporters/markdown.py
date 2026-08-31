@@ -60,6 +60,16 @@ def _yaml_scalar(value: str | int | None) -> str:
     return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
+_SUPERSCRIPT_DIGITS = str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")
+
+
+def _superscript(number: int) -> str:
+    """``176`` as ``¹⁷⁶``: the verse number raised without markup, so it
+    stays out of the way of the text and still reads the same in Obsidian's
+    editor as in its preview, which a ``<sup>`` tag does not."""
+    return str(number).translate(_SUPERSCRIPT_DIGITS)
+
+
 def _chapter_filename(code: str, book: Book, chapter: Chapter) -> str:
     """``ARA-01-GEN-001.md``: version-qualified, so it is unique across a vault.
 
@@ -77,10 +87,11 @@ class MarkdownExporter:
     canonical order, and spelled in English or as a USFM code, so a path is the
     same in every version and carries no accents; the version prefix keeps the
     note unique in a vault holding several translations. The chapter body is one
-    verse per paragraph, the number in a ``<sup>`` tag rather than a list marker
-    so no indent eats into the line, each verse ending in a block id
-    (``^acf-gen-1-1``) so verses stay individually linkable; the id keeps using
-    the USFM code, so renaming files never invalidates a link.
+    verse per paragraph, opened by the verse number in superscript digits --
+    plain text, no HTML and no list marker, so the line reads the same in an
+    editor as in a preview -- and closed by a block id (``^acf-gen-1-1``) so
+    verses stay individually linkable; the id keeps using the USFM code, so
+    renaming files never invalidates a link.
 
     Beside them sits one folder note per version, ``ARA/ARA.md``, carrying
     everything about the version that the file names cannot: its full title,
@@ -146,5 +157,5 @@ class MarkdownExporter:
         for verse in chapter.verses:
             text = " ".join(verse.text.split())
             block_id = f"{code}-{book.code}-{chapter.number}-{verse.number}".lower()
-            lines += [f"<sup>{verse.number}</sup> {text} ^{block_id}", ""]
+            lines += [f"{_superscript(verse.number)} {text} ^{block_id}", ""]
         return "\n".join(lines)
