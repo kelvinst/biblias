@@ -60,14 +60,15 @@ def _yaml_scalar(value: str | int | None) -> str:
     return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-_SUPERSCRIPT_DIGITS = str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")
-
-
 def _superscript(number: int) -> str:
-    """``176`` as ``¹⁷⁶``: the verse number raised without markup, so it
-    stays out of the way of the text and still reads the same in Obsidian's
-    editor as in its preview, which a ``<sup>`` tag does not."""
-    return str(number).translate(_SUPERSCRIPT_DIGITS)
+    """``176`` as ``^176^``: Markdown's own superscript, so the raising is
+    markup a renderer applies rather than a separate set of characters, and the
+    number in the source stays the ordinary digits a search or a script reads.
+
+    The whole number sits inside one pair of carets, so a verse past nine is
+    raised as a single number rather than as digits raised one at a time.
+    """
+    return f"^{number}^"
 
 
 def _chapter_filename(code: str, book: Book, chapter: Chapter) -> str:
@@ -87,11 +88,11 @@ class MarkdownExporter:
     canonical order, and spelled in English or as a USFM code, so a path is the
     same in every version and carries no accents; the version prefix keeps the
     note unique in a vault holding several translations. The chapter body is one
-    verse per paragraph, opened by the verse number in superscript digits --
-    plain text, no HTML and no list marker, so the line reads the same in an
-    editor as in a preview -- and closed by a block id (``^acf-gen-1-1``) so
-    verses stay individually linkable; the id keeps using the USFM code, so
-    renaming files never invalidates a link.
+    verse per paragraph, opened by the verse number in Markdown superscript
+    (``^1^``) -- markup, no HTML and no list marker, so the number reads as an
+    ordinary number in the source and raised in a preview -- and closed by a
+    block id (``^acf-gen-1-1``) so verses stay individually linkable; the id
+    keeps using the USFM code, so renaming files never invalidates a link.
 
     Beside them sits one folder note per version, ``ARA/ARA.md``, carrying
     everything about the version that the file names cannot: its full title,
