@@ -145,17 +145,28 @@ def test_chapter_file_shape(tmp_path: Path):
     out = tmp_path / "KJA"
     MarkdownExporter().export(_bible(), out)
     assert (out / "1-OT-Law" / "KJA-01-GEN" / "KJA-01-GEN-001.md").read_text(encoding="utf-8") == (
-        "# Gênesis 1\n"
+        "# Gênesis 1 - KJA\n"
         "\n"
         "^1^ No princípio... ^kja-gen-1-1\n"
         "\n"
         "^2^ E a terra... ^kja-gen-1-2\n"
     )
     assert (out / "1-OT-Law" / "KJA-01-GEN" / "KJA-01-GEN-002.md").read_text(encoding="utf-8") == (
-        "# Gênesis 2\n"
+        "# Gênesis 2 - KJA\n"
         "\n"
         "^1^ Assim foram... ^kja-gen-2-1\n"
     )
+
+
+def test_a_chapter_heading_names_the_version(tmp_path: Path):
+    """A search hit or a graph node shows the heading, not the path, so the
+    version has to be spelled inside the note for two translations of the same
+    chapter to be told apart."""
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(_bible(), out)
+    body = (out / "3-OT-Wisdom" / "KJA-20-PRO"
+            / "KJA-20-PRO-001.md").read_text(encoding="utf-8")
+    assert body.startswith("# Provérbios 1 - KJA\n")
 
 
 def test_a_chapter_carries_no_links_to_its_neighbours(tmp_path: Path):
