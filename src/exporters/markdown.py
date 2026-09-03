@@ -87,7 +87,10 @@ class MarkdownExporter:
     book and chapter names are numbered so Finder and Obsidian sort them in
     canonical order, and spelled in English or as a USFM code, so a path is the
     same in every version and carries no accents; the version prefix keeps the
-    note unique in a vault holding several translations. The chapter body is one
+    note unique in a vault holding several translations. A chapter's heading
+    ends in the version code (``Gênesis 1 - ARA``), so the version is named
+    wherever the note itself is read -- in a search hit, a graph node or an
+    embed -- and not only in its path. The chapter body is one
     verse per paragraph, opened by the verse number in Markdown superscript
     (``^1^``) -- markup, no HTML and no list marker, so the number reads as an
     ordinary number in the source and raised in a preview -- and closed by a
@@ -154,7 +157,7 @@ class MarkdownExporter:
                 ("scope", meta.scope), ("source", meta.source))
 
     def _render_chapter(self, book: Book, chapter: Chapter, code: str) -> str:
-        lines = [f"# {book.name} {chapter.number}", ""]
+        lines = [f"# {book.name} {chapter.number} - {code}", ""]
         for verse in chapter.verses:
             text = " ".join(verse.text.split())
             block_id = f"{code}-{book.code}-{chapter.number}-{verse.number}".lower()
