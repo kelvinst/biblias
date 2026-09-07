@@ -1,7 +1,8 @@
+import re
 import shutil
 from pathlib import Path
 
-from model import Bible, BibleMeta, Book, Chapter
+from model import Bible, BibleMeta, Book, Chapter, Verse
 
 # (last book id in the category, folder name). Every category is a contiguous
 # id range, so the first entry a book fits under is its category. The testament
@@ -60,15 +61,41 @@ def _yaml_scalar(value: str | int | None) -> str:
     return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-def _superscript(number: int) -> str:
+def _superscript(label: str) -> str:
     """``176`` as ``^176^``: Markdown's own superscript, so the raising is
     markup a renderer applies rather than a separate set of characters, and the
     number in the source stays the ordinary digits a search or a script reads.
 
-    The whole number sits inside one pair of carets, so a verse past nine is
-    raised as a single number rather than as digits raised one at a time.
+    The whole label sits inside one pair of carets, so a verse past nine -- or a
+    range like ``1-2`` -- is raised as a single number rather than as digits
+    raised one at a time.
     """
-    return f"^{number}^"
+    return f"^{label}^"
+
+
+_RANGE_PREFIX = re.compile(r"^(\d+-\d+)\s+")
+
+
+def _verse_label_and_text(verse: Verse) -> tuple[str, str]:
+    """The number to raise and the text to follow it with.
+
+    A version that merges verses -- A Mensagem does it throughout -- carries the
+    range it merged at the head of the text itself (``1-2 Em primeiro lugar``).
+    Left there it prints twice: once as the raised verse number the exporter
+    adds, once as the ordinary digits opening the paragraph. So the range is
+    lifted out of the text and raised in place of the number, and the reader
+    sees which verses the paragraph covers instead of only where it starts. A
+    bare number is left alone: verses legitimately open with one (``435 camelos
+    e 6.720 jumentos``), and only a range says a merge happened.
+
+    The block id keeps using the verse's own number, so a link into a merged
+    paragraph stays the link it always was.
+    """
+    text = " ".join(verse.text.split())
+    match = _RANGE_PREFIX.match(text)
+    if match is None:
+        return str(verse.number), text
+    return match.group(1), text[match.end():]
 
 
 def _chapter_filename(code: str, book: Book, chapter: Chapter) -> str:
@@ -92,7 +119,10 @@ class MarkdownExporter:
     (``^1^``) -- markup, no HTML and no list marker, so the number reads as an
     ordinary number in the source and raised in a preview -- and closed by a
     block id (``^acf-gen-1-1``) so verses stay individually linkable; the id
-    keeps using the USFM code, so renaming files never invalidates a link.
+    keeps using the USFM code, so renaming files never invalidates a link. Where
+    a version merges verses and says so at the head of the text (``1-2 Em
+    primeiro lugar``), that range is raised instead of the number and printed
+    once rather than twice.
 
     Beside them sits one folder note per version, ``ARA/ARA.md``, carrying
     everything about the version that the file names cannot: its full title,
@@ -156,7 +186,7 @@ class MarkdownExporter:
     def _render_chapter(self, book: Book, chapter: Chapter, code: str) -> str:
         lines = [f"# {book.name} {chapter.number}", ""]
         for verse in chapter.verses:
-            text = " ".join(verse.text.split())
+            label, text = _verse_label_and_text(verse)
             block_id = f"{code}-{book.code}-{chapter.number}-{verse.number}".lower()
-            lines += [f"{_superscript(verse.number)} {text} ^{block_id}", ""]
+            lines += [f"{_superscript(label)} {text} ^{block_id}", ""]
         return "\n".join(lines)

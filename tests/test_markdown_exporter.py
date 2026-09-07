@@ -292,3 +292,38 @@ def test_category_folders_are_ascii_and_sort_in_canonical_order():
     names = [_category_dirname(_ref_book(ref)) for ref in books.BOOKS]
     assert all(n.isascii() for n in names), names
     assert sorted(set(names), key=names.index) == sorted(set(names))
+
+
+def _one_verse(text: str, number: int = 1) -> Bible:
+    return Bible(
+        meta=BibleMeta(code="KJA", name="n", license="copyright", scope="full", source="t"),
+        books=[Book(id=1, code="GEN", name="Gênesis", abbrev="Gn", chapters=[
+            Chapter(number=1, verses=[Verse(number=number, text=text)]),
+        ])],
+    )
+
+
+def _first_chapter(bible: Bible, tmp_path: Path) -> str:
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(bible, out)
+    return (out / "1-OT-Law" / "KJA-01-GEN"
+            / "KJA-01-GEN-001.md").read_text(encoding="utf-8")
+
+
+def test_a_merged_verse_range_is_raised_in_place_of_the_number(tmp_path: Path):
+    """A Mensagem opens a merged paragraph with the range it merged; printing the
+    exporter's number beside it would print the verse number twice."""
+    body = _first_chapter(_one_verse("1-2 Em primeiro lugar..."), tmp_path)
+    assert "^1-2^ Em primeiro lugar... ^kja-gen-1-1" in body
+
+
+def test_a_merged_range_keeps_the_block_id_of_the_verse_it_starts_at(tmp_path: Path):
+    """Links into a merged paragraph stay the links they always were."""
+    body = _first_chapter(_one_verse("3-5 Deus disse...", number=3), tmp_path)
+    assert "^3-5^ Deus disse... ^kja-gen-1-3" in body
+
+
+def test_text_opening_with_a_bare_number_is_left_alone(tmp_path: Path):
+    """Verses legitimately open with a number; only a range says a merge happened."""
+    body = _first_chapter(_one_verse("435 camelos e 6.720 jumentos."), tmp_path)
+    assert "^1^ 435 camelos e 6.720 jumentos. ^kja-gen-1-1" in body
