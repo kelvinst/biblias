@@ -73,10 +73,10 @@ def _superscript(label: str) -> str:
     return f"^{label}^"
 
 
-_RANGE_PREFIX = re.compile(r"^(\d+-\d+)\s+")
+_RANGE_PREFIX = re.compile(r"^(\d+)-(\d+)\s+")
 
 
-def _verse_label_and_text(verse: Verse) -> tuple[str, str]:
+def _verse_label_and_text(verse: Verse, numbers: frozenset[int]) -> tuple[str, str]:
     """The number to raise and the text to follow it with.
 
     A version that merges verses -- A Mensagem does it throughout -- carries the
@@ -88,6 +88,19 @@ def _verse_label_and_text(verse: Verse) -> tuple[str, str]:
     bare number is left alone: verses legitimately open with one (``435 camelos
     e 6.720 jumentos``), and only a range says a merge happened.
 
+    A range is only believed when it opens at the verse's own number and climbs:
+    the source carries a handful that do neither (``32-31``, ``26-1``, ``6-6``,
+    and a ``28-34`` sitting at verse 25), and raising those puts a label on the
+    paragraph that reads backwards or contradicts the verse it labels. Those
+    stay ordinary text at the head of the line, where they are at least plainly
+    part of the paragraph rather than its number.
+
+    ``numbers`` is every verse number the chapter stores, and the range is cut
+    back to stop below the next of them: a chapter that opens verse 2 with
+    ``2-5`` and then stores a verse 5 of its own would otherwise raise 5 twice,
+    so the first paragraph is labelled ``2-4``. Cut back to nothing, it is
+    labelled with its own number alone.
+
     The block id keeps using the verse's own number, so a link into a merged
     paragraph stays the link it always was.
     """
@@ -95,7 +108,12 @@ def _verse_label_and_text(verse: Verse) -> tuple[str, str]:
     match = _RANGE_PREFIX.match(text)
     if match is None:
         return str(verse.number), text
-    return match.group(1), text[match.end():]
+    start, end = int(match.group(1)), int(match.group(2))
+    if start != verse.number or end <= start:
+        return str(verse.number), text
+    end = min([end] + [number - 1 for number in numbers if start < number <= end])
+    label = f"{start}-{end}" if end > start else str(start)
+    return label, text[match.end():]
 
 
 def _chapter_filename(code: str, book: Book, chapter: Chapter) -> str:
@@ -188,8 +206,9 @@ class MarkdownExporter:
 
     def _render_chapter(self, book: Book, chapter: Chapter, code: str) -> str:
         lines = [f"# {book.name} {chapter.number} - {code}", ""]
+        numbers = frozenset(verse.number for verse in chapter.verses)
         for verse in chapter.verses:
-            label, text = _verse_label_and_text(verse)
+            label, text = _verse_label_and_text(verse, numbers)
             block_id = f"{code}-{book.code}-{chapter.number}-{verse.number}".lower()
             lines += [f"{_superscript(label)} {text} ^{block_id}", ""]
         return "\n".join(lines)
