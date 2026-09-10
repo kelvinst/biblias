@@ -338,3 +338,42 @@ def test_text_opening_with_a_bare_number_is_left_alone(tmp_path: Path):
     """Verses legitimately open with a number; only a range says a merge happened."""
     body = _first_chapter(_one_verse("435 camelos e 6.720 jumentos."), tmp_path)
     assert "^1^ 435 camelos e 6.720 jumentos. ^kja-gen-1-1" in body
+
+
+def test_a_range_that_does_not_climb_is_left_as_ordinary_text(tmp_path: Path):
+    """`32-31`, `6-6` and the like occur in the source; raised, they read backwards."""
+    body = _first_chapter(_one_verse("32-31 “No dia do juízo...", number=32), tmp_path)
+    assert "^32^ 32-31 “No dia do juízo... ^kja-gen-1-32" in body
+
+
+def test_a_range_starting_at_another_verse_is_left_as_ordinary_text(tmp_path: Path):
+    """A `28-34` sitting at verse 25 would contradict its own block id."""
+    body = _first_chapter(_one_verse("28-34 O Eterno disse...", number=25), tmp_path)
+    assert "^25^ 28-34 O Eterno disse... ^kja-gen-1-25" in body
+
+
+def test_a_range_stops_below_the_next_verse_the_chapter_stores(tmp_path: Path):
+    """A chapter opening verse 2 with `2-5` and storing a verse 5 of its own would
+    otherwise raise 5 twice."""
+    bible = Bible(
+        meta=BibleMeta(code="KJA", name="n", license="copyright", scope="full", source="t"),
+        books=[Book(id=1, code="GEN", name="Gênesis", abbrev="Gn", chapters=[
+            Chapter(number=1, verses=[Verse(number=2, text="2-5 Toda vez..."),
+                                      Verse(number=5, text="5-6 Vocês prestaram...")]),
+        ])],
+    )
+    body = _first_chapter(bible, tmp_path)
+    assert "^2-4^ Toda vez... ^kja-gen-1-2" in body
+    assert "^5-6^ Vocês prestaram... ^kja-gen-1-5" in body
+
+
+def test_a_range_cut_back_to_nothing_keeps_the_verse_number_alone(tmp_path: Path):
+    bible = Bible(
+        meta=BibleMeta(code="KJA", name="n", license="copyright", scope="full", source="t"),
+        books=[Book(id=1, code="GEN", name="Gênesis", abbrev="Gn", chapters=[
+            Chapter(number=1, verses=[Verse(number=1, text="1-2 Em primeiro lugar..."),
+                                      Verse(number=2, text="Segundo...")]),
+        ])],
+    )
+    body = _first_chapter(bible, tmp_path)
+    assert "^1^ Em primeiro lugar... ^kja-gen-1-1" in body
