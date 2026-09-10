@@ -139,7 +139,8 @@ def validate(
     # The cross-version pass compares each verse against the other versions, so it needs
     # the whole corpus even when only a subset is reported: narrowing it would write
     # worklists poorer than a full run.
-    corpus = [canon.load_bible(c, CANON_DIR) for c in canonical_codes()]
+    present = canonical_codes()
+    corpus = [canon.load_bible(c, CANON_DIR) for c in present]
     cross = validate_mod.cross_version_findings(corpus)
     computed: dict[str, metrics_mod.VersionMetrics] = {}
     for bible in corpus:
@@ -153,5 +154,7 @@ def validate(
         c = merged.counts
         typer.echo(f"{bible.meta.code}: {c[validate_mod.Tier.HIGH]} alta, "
                    f"{c[validate_mod.Tier.LOW]} baixa, {c[validate_mod.Tier.INFO]} info")
-    metrics_mod.write_metrics(computed, METRICS_PATH)
+    # `present` poda do arquivo as versões que saíram do canônico; sem isso a linha de
+    # uma versão renomeada fica lá para sempre.
+    metrics_mod.write_metrics(computed, METRICS_PATH, known=set(present))
     typer.echo(f"métricas gravadas em {METRICS_PATH}.")

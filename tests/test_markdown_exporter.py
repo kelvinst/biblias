@@ -5,6 +5,8 @@ import books
 import catalog
 from exporters.markdown import (
     _CAVEAT,
+    _METHOD_LABELS,
+    _TEXT_BASE_LABELS,
     MarkdownExporter,
     _book_dirname,
     _category_dirname,
@@ -546,3 +548,30 @@ def test_a_version_outside_the_catalog_still_exports(tmp_path: Path):
 def test_the_book_table_follows_the_classification(tmp_path: Path):
     note = _folder_note(tmp_path)
     assert note.index("## Classificação") < note.index("| # | Código | Livro | Abreviação |")
+
+
+def test_an_incomplete_metrics_row_is_treated_as_no_metrics(tmp_path: Path):
+    """Um `metrics.json` de esquema antigo não pode derrubar a build — e `export` já
+    apagou a pasta de destino quando a nota é renderizada."""
+    note = _folder_note(tmp_path, metrics={"KJA": {"integrity": 97, "readability": 54}})
+    assert "### Medidas do texto" not in note
+    assert "integrity_pct: 97" in note
+    assert "## Classificação" in note
+
+
+def test_every_catalog_value_has_a_label(tmp_path: Path):
+    """A extensão do vocabulário falha aqui, não no meio de uma build."""
+    for entry in catalog.CATALOG.values():
+        assert entry.text_base in _TEXT_BASE_LABELS, entry.code
+        assert entry.method in _METHOD_LABELS, entry.code
+
+
+def test_an_unknown_text_base_degrades_instead_of_raising(tmp_path: Path, monkeypatch):
+    entry = catalog.get("KJA")
+    monkeypatch.setitem(
+        catalog.CATALOG, "KJA",
+        catalog.CatalogEntry(entry.code, entry.name, entry.year, entry.publisher,
+                             entry.license, entry.scope, "majority-text", entry.formality,
+                             entry.trust, entry.respect),
+    )
+    assert "Base textual do Novo Testamento: **não declarada**." in _folder_note(tmp_path)

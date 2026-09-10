@@ -52,9 +52,10 @@ def count_syllables(word: str) -> int:
     total = 0
     for match in re.finditer(f"[{_VOWELS}]+", low):
         group = match.group()
-        # "Posição final" é fim de palavra, não fim de grupo: `his-tó-ria` fecha em
-        # ditongo, `di-an-te` não, e os dois trazem o mesmo par.
-        word_final = match.end() == len(low)
+        # "Posição final" é a última sílaba, não a última letra: consoante depois do
+        # grupo não desfaz o ditongo, senão `his-tó-rias` sairia com uma sílaba a mais
+        # que `his-tó-ria`. Já `di-an-te` traz o mesmo par com vogal adiante, e é hiato.
+        word_final = not re.search(f"[{_VOWELS}]", low[match.end():])
         i = 0
         while i < len(group):
             pair = _strip_accent(group[i]) + group[i + 1] if i + 1 < len(group) else ""
@@ -129,8 +130,13 @@ def integrity(bible: Bible, findings: list[Finding]) -> Integrity:
     `Tier.INFO` pesa zero por definição: split de versificação e omissão intencional são
     características da versão, não defeito dela. `HIGH` pesa o triplo de `LOW` porque
     corrupção e truncamento perdem texto, enquanto pontuação terminal faltando é
-    cosmético. Um mesmo versículo sinalizado pelo validador e pela comparação entre
-    versões conta uma vez só.
+    cosmético.
+
+    `high`, `low` e `info` contam versículos distintos, não achados, e em cascata: um
+    versículo aparece no pior tier em que foi sinalizado e em nenhum outro. Sem isso todo
+    truncamento pesaria 4 em vez de 3, porque a comparação entre versões só devolve HIGH
+    para versículo sem pontuação terminal, que o validador já marcou como LOW. É também
+    por isso que estes números podem ficar abaixo dos da worklist, que lista achados.
     """
     chapters_present = sum(len(b.chapters) for b in bible.books)
     chapters_expected = _expected_chapters(bible.meta.scope)
@@ -139,7 +145,10 @@ def integrity(bible: Bible, findings: list[Finding]) -> Integrity:
     def refs(tier: Tier) -> set[tuple[str, int, int]]:
         return {(f.book_code, f.chapter, f.verse) for f in findings if f.tier is tier}
 
-    high, low, info = len(refs(Tier.HIGH)), len(refs(Tier.LOW)), len(refs(Tier.INFO))
+    high_refs = refs(Tier.HIGH)
+    low_refs = refs(Tier.LOW) - high_refs
+    info_refs = refs(Tier.INFO) - high_refs - low_refs
+    high, low, info = len(high_refs), len(low_refs), len(info_refs)
     # Satura em 1: cobertura acima do cânon não é integridade extra, e deixaria um
     # defeito de sanidade escondido atrás do excesso. O excesso continua visível em
     # `chapters_present`.
@@ -175,12 +184,22 @@ def compute(bible: Bible, findings: list[Finding]) -> VersionMetrics:
     return VersionMetrics(integrity=integrity(bible, findings), readability=readability(bible))
 
 
-def write_metrics(computed: dict[str, VersionMetrics], path: Path) -> Path:
+def write_metrics(
+    computed: dict[str, VersionMetrics],
+    path: Path,
+    known: set[str] | None = None,
+) -> Path:
     """Grava o arquivo inteiro, ordenado por código, mesclando com o que já está lá:
-    validar uma versão só não pode apagar as métricas das outras."""
+    validar uma versão só não pode apagar as métricas das outras.
+
+    `known` são os códigos que ainda existem; o que estiver fora deles sai do arquivo.
+    Sem essa poda, uma versão renomeada ou removida do canônico deixa a linha antiga no
+    arquivo versionado para sempre, e nada avisa.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     merged = load_metrics(path) | {code: m.as_json() for code, m in computed.items()}
-    payload = {code: merged[code] for code in sorted(merged)}
+    payload = {code: merged[code] for code in sorted(merged)
+               if known is None or code in known}
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return path
 
@@ -189,6 +208,8 @@ def load_metrics(path: Path) -> dict[str, dict]:
     """Ausente ou ilegível, devolve vazio: a nota sai sem a seção de medidas em vez de
     quebrar a build."""
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8"))
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
+    # Um JSON válido que não seja objeto estouraria só lá adiante, no exportador.
+    return data if isinstance(data, dict) else {}

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 import catalog
+import versification
 from model import Bible
 
 _TERMINAL = ('.', '!', '?', '"', '”', '’', '»', ')', ']', ':', ';', '…', '—', '*')
@@ -56,6 +57,16 @@ def _is_corruption(text: str) -> bool:
 def validate_bible(bible: Bible) -> Report:
     findings: list[Finding] = []
     for book in bible.books:
+        # Capítulo a mais que o cânon é defeito estrutural que nada mais enxerga: a NTLH
+        # carregava catorze capítulos fantasmas em 2 Samuel, criados por um versículo
+        # agrupado que transbordou na fonte, e nenhuma worklist os mostrava. Falta de
+        # capítulo não entra aqui porque a completude da métrica de integridade já a
+        # mede; excesso ela satura e esconde. Fica em 0:0 porque é do livro, não de um
+        # versículo.
+        expected = versification.chapters_for(book.code)
+        if len(book.chapters) > expected:
+            findings.append(Finding(book.code, 0, 0, Tier.HIGH,
+                                    f"chapter count {len(book.chapters)}, canon expects {expected}"))
         for chapter in book.chapters:
             verses = chapter.verses
             for i, verse in enumerate(verses):

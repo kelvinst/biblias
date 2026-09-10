@@ -24,6 +24,12 @@ _METHOD_LABELS: dict[str, str] = {
     "functional": "equivalência funcional",
     "paraphrase": "paráfrase",
 }
+# As chaves que a subseção de medidas consome. Uma linha de `metrics.json` que não as
+# traga todas — esquema antigo, edição à mão — cai no mesmo caminho da linha ausente:
+# a nota sai sem as medidas, em vez de a build morrer com a pasta já apagada.
+_MEASURE_KEYS = frozenset({"integrity", "chapters_present", "chapters_expected",
+                           "high", "low", "readability", "words_per_sentence",
+                           "syllables_per_word"})
 _TRUST_FACTORS = ("Origem direta", "Base manuscrita", "Comissão", "Transparência")
 _RESPECT_FACTORS = ("Púlpito", "Seminário", "Literatura", "Transversalidade")
 
@@ -292,7 +298,8 @@ class MarkdownExporter:
             return []
         lines = [
             "## Classificação", "",
-            f"Base textual do Novo Testamento: **{_TEXT_BASE_LABELS[entry.text_base]}**. "
+            "Base textual do Novo Testamento: "
+            f"**{_TEXT_BASE_LABELS.get(entry.text_base, 'não declarada')}**. "
             f"Método: **{_METHOD_LABELS[entry.method]}** (formalidade {entry.formality}%).",
             "",
             f"### Confiança quanto aos originais — {entry.trust.total}%", "",
@@ -302,7 +309,7 @@ class MarkdownExporter:
             entry.respect.note, "",
             *_rubric_table(_RESPECT_FACTORS, entry.respect), "",
         ]
-        if measures:
+        if measures and _MEASURE_KEYS <= measures.keys():
             lines += [
                 "### Medidas do texto", "",
                 "| Medida | Valor |", "| --- | --: |",
