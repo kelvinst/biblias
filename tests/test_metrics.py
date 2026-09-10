@@ -31,6 +31,7 @@ def _bible(verses: list[str], code: str = "X", scope: str = "full") -> Bible:
     ("saúde", 3),        # acento na segunda vogal desfaz: sa-ú-de
     ("país", 2),         # pa-ís
     ("história", 3),     # ditongo crescente final: his-tó-ria
+    ("histórias", 3),    # o plural não acrescenta sílaba ao singular
     ("diante", 3),       # o mesmo par fora da posição final é hiato: di-an-te
     ("piano", 3),
     ("aqui", 2),         # o u de "qu" não forma sílaba
@@ -165,3 +166,41 @@ def test_write_and_load_round_trip(tmp_path: Path):
 
 def test_load_metrics_of_a_missing_file_is_empty(tmp_path: Path):
     assert metrics.load_metrics(tmp_path / "nope.json") == {}
+
+
+def test_a_verse_flagged_in_two_tiers_counts_once_in_the_worst():
+    """Todo achado HIGH da comparação entre versões vem de um versículo sem pontuação
+    terminal, que o validador já marcou como LOW: sem a cascata, um defeito pesa 4."""
+    bible = _bible(["a.", "b.", "c.", "d."])
+    both = metrics.integrity(bible, [_finding(1, Tier.HIGH), _finding(1, Tier.LOW)])
+    only_high = metrics.integrity(bible, [_finding(1, Tier.HIGH)])
+    assert both.high == 1 and both.low == 0
+    assert both.sanity == pytest.approx(only_high.sanity)
+
+
+def test_an_info_finding_on_a_low_verse_does_not_count_twice():
+    bible = _bible(["a.", "b."])
+    m = metrics.integrity(bible, [_finding(1, Tier.LOW), _finding(1, Tier.INFO)])
+    assert (m.low, m.info) == (1, 0)
+
+
+def test_write_metrics_prunes_codes_that_no_longer_exist(tmp_path: Path):
+    path = tmp_path / "metrics.json"
+    bible = _bible(["Casa casa casa casa."])
+    metrics.write_metrics({"A": metrics.compute(bible, []), "B": metrics.compute(bible, [])}, path)
+    metrics.write_metrics({"A": metrics.compute(bible, [])}, path, known={"A"})
+    assert set(json.loads(path.read_text(encoding="utf-8"))) == {"A"}
+
+
+def test_write_metrics_without_a_known_set_keeps_the_other_versions(tmp_path: Path):
+    path = tmp_path / "metrics.json"
+    bible = _bible(["Casa casa casa casa."])
+    metrics.write_metrics({"A": metrics.compute(bible, []), "B": metrics.compute(bible, [])}, path)
+    metrics.write_metrics({"A": metrics.compute(bible, [])}, path)
+    assert set(json.loads(path.read_text(encoding="utf-8"))) == {"A", "B"}
+
+
+def test_load_metrics_of_a_file_that_is_not_an_object_is_empty(tmp_path: Path):
+    path = tmp_path / "metrics.json"
+    path.write_text('["A", "B"]', encoding="utf-8")
+    assert metrics.load_metrics(path) == {}

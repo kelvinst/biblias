@@ -1,0 +1,194 @@
+[
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 25,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 26,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 27,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 28,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 29,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 30,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 31,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 32,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 33,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 34,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 35,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 36,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 37,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 38,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 23,
+    "verse": 39,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  },
+  {
+    "book": "2SA",
+    "chapter": 24,
+    "verse": 25,
+    "was": "capítulo 25 a 38 inexistentes: o versículo agrupado 23.24-39 transbordou para um capítulo por versículo, e a repetição de 23.25 caiu como um segundo 24.25 (defeito de inst/sql/NTLH.sqlite, reproduzido fielmente pelo fetcher)",
+    "now": "23.25-39 repetem o texto agrupado [24-39] dentro do capítulo 23, como o arquivo já faz com [22-23]; 24 volta a ter 25 versículos e o livro, 24 capítulos",
+    "source": "estrutura do próprio arquivo (convenção de versículo agrupado da NTLH)",
+    "corroborated_by": [
+      "versification.CHAPTERS",
+      "bibliaonline.com.br:ntlh"
+    ]
+  }
+]

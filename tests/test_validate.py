@@ -107,3 +107,37 @@ def test_paraphrases_are_derived_from_the_catalog():
     """A mesma informação declarada em dois lugares diverge; o catálogo é o lugar certo."""
     assert validate._PARAPHRASE == {"OL", "MENS"}
     assert validate._PARAPHRASE == catalog.paraphrase_codes()
+
+
+def _book(code: str, chapters: int) -> Book:
+    return Book(id=10, code=code, name="2 Samuel", abbrev="2Sm", chapters=[
+        Chapter(number=n, verses=[Verse(number=1, text="Texto.")]) for n in range(1, chapters + 1)
+    ])
+
+
+def _with_books(books_: list[Book]) -> Bible:
+    return Bible(
+        meta=BibleMeta(code="X", name="Teste", license="public-domain", scope="full", source="t"),
+        books=books_,
+    )
+
+
+def test_a_book_with_more_chapters_than_the_canon_is_a_high_finding():
+    """Foi assim que a NTLH carregou 14 capítulos fantasmas em 2 Samuel sem ninguém ver."""
+    report = validate_bible(_with_books([_book("2SA", 38)]))
+    structural = [f for f in report.findings if "chapter count" in f.reason]
+    assert len(structural) == 1
+    assert structural[0].tier is Tier.HIGH
+    assert structural[0].book_code == "2SA"
+    assert "38" in structural[0].reason and "24" in structural[0].reason
+
+
+def test_a_book_with_fewer_chapters_is_left_to_the_integrity_metric():
+    """Falta de capítulo já aparece na completude; excesso não aparece em lugar nenhum."""
+    assert not [f for f in validate_bible(_with_books([_book("2SA", 23)])).findings
+                if "chapter count" in f.reason]
+
+
+def test_a_book_with_the_canonical_chapter_count_is_not_flagged():
+    assert not [f for f in validate_bible(_with_books([_book("2SA", 24)])).findings
+                if "chapter count" in f.reason]
