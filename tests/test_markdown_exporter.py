@@ -1,7 +1,10 @@
+import json
 from pathlib import Path
 
 import books
+import catalog
 from exporters.markdown import (
+    _CAVEAT,
     MarkdownExporter,
     _book_dirname,
     _category_dirname,
@@ -79,9 +82,12 @@ def test_the_folder_note_is_named_after_the_version_folder(tmp_path: Path):
 
 
 def test_the_folder_note_carries_the_version_metadata(tmp_path: Path):
-    """The one place the licence, the publisher and the full title survive."""
+    """The one place the licence, the publisher, the full title and the editorial
+    classification survive. Rendered without ``metrics.json``, so the note shows the
+    shape a version has before anything is computed for it."""
+    entry = catalog.get("KJA")
     out = tmp_path / "KJA"
-    MarkdownExporter().export(_bible(), out)
+    MarkdownExporter(metrics_path=tmp_path / "absent.json").export(_bible(), out)
     assert (out / "KJA.md").read_text(encoding="utf-8") == (
         "---\n"
         'code: "KJA"\n'
@@ -91,9 +97,45 @@ def test_the_folder_note_carries_the_version_metadata(tmp_path: Path):
         'license: "copyright"\n'
         'scope: "full"\n'
         'source: "openlp_sqlite"\n'
+        'text_base: "eclectic"\n'
+        'method: "balanced"\n'
+        "formality_pct: 62\n"
+        "trust_pct: 65\n"
+        "respect_pct: 50\n"
+        "integrity_pct:\n"
+        "readability_pct:\n"
         "---\n"
         "\n"
         "# King James Atualizada\n"
+        "\n"
+        "## Classificação\n"
+        "\n"
+        "Base textual do Novo Testamento: **texto eclético**. "
+        "Método: **equivalência equilibrada** (formalidade 62%).\n"
+        "\n"
+        "### Confiança quanto aos originais — 65%\n"
+        "\n"
+        f"{entry.trust.note}\n"
+        "\n"
+        "| Fator | Nota |\n"
+        "| --- | --: |\n"
+        "| Origem direta | 18 |\n"
+        "| Base manuscrita | 17 |\n"
+        "| Comissão | 15 |\n"
+        "| Transparência | 15 |\n"
+        "\n"
+        "### Aceitação — 50%\n"
+        "\n"
+        f"{entry.respect.note}\n"
+        "\n"
+        "| Fator | Nota |\n"
+        "| --- | --: |\n"
+        "| Púlpito | 14 |\n"
+        "| Seminário | 11 |\n"
+        "| Literatura | 12 |\n"
+        "| Transversalidade | 13 |\n"
+        "\n"
+        f"{_CAVEAT}\n"
         "\n"
         "| # | Código | Livro | Abreviação |\n"
         "| --: | --- | --- | --- |\n"
@@ -377,3 +419,130 @@ def test_a_range_cut_back_to_nothing_keeps_the_verse_number_alone(tmp_path: Path
     )
     body = _first_chapter(bible, tmp_path)
     assert "^1^ Em primeiro lugar... ^kja-gen-1-1" in body
+# --- nota de pasta: propriedades e classificação ---------------------------------
+
+_METRICS = {
+    "KJA": {"integrity": 97, "chapters_present": 1189, "chapters_expected": 1189,
+            "verses": 31102, "high": 12, "low": 340, "info": 900,
+            "readability": 54, "words_per_sentence": 21.4, "syllables_per_word": 2.31},
+}
+
+
+def _folder_note(tmp_path: Path, bible: Bible | None = None, metrics: dict | None = None) -> str:
+    metrics_path = tmp_path / "metrics.json"
+    if metrics is not None:
+        metrics_path.write_text(json.dumps(metrics), encoding="utf-8")
+    out = tmp_path / "out"
+    bible = bible or _bible()
+    MarkdownExporter(metrics_path=metrics_path).export(bible, out)
+    return (out / f"{bible.meta.code}.md").read_text(encoding="utf-8")
+
+
+def _frontmatter(note: str) -> list[str]:
+    return note.split("---\n")[1].strip().splitlines()
+
+
+def test_the_frontmatter_carries_fourteen_properties_in_order(tmp_path: Path):
+    keys = [line.split(":")[0] for line in _frontmatter(_folder_note(tmp_path, metrics=_METRICS))]
+    assert keys == ["code", "name", "year", "publisher", "license", "scope", "source",
+                    "text_base", "method", "formality_pct", "trust_pct", "respect_pct",
+                    "integrity_pct", "readability_pct"]
+
+
+def test_percentages_are_bare_integers(tmp_path: Path):
+    note = _folder_note(tmp_path, metrics=_METRICS)
+    assert "formality_pct: 62" in note
+    assert "trust_pct: 65" in note
+    assert "respect_pct: 50" in note
+    assert "integrity_pct: 97" in note
+    assert "readability_pct: 54" in note
+
+
+def test_a_property_without_a_value_is_still_emitted(tmp_path: Path):
+    """Vazio e ausente precisam ser distinguíveis por uma query."""
+    note = _folder_note(tmp_path)   # sem metrics.json
+    assert "integrity_pct:" in note
+    assert "integrity_pct: " not in note.replace("integrity_pct:\n", "")
+    assert "readability_pct:" in note
+
+
+def test_text_base_and_method_are_english_in_the_frontmatter(tmp_path: Path):
+    note = _folder_note(tmp_path)
+    assert 'text_base: "eclectic"' in note
+    assert 'method: "balanced"' in note
+
+
+def test_the_body_names_the_text_base_and_method_in_portuguese(tmp_path: Path):
+    body = _folder_note(tmp_path)
+    assert "Base textual do Novo Testamento: **texto eclético**." in body
+    assert "Método: **equivalência equilibrada** (formalidade 62%)." in body
+
+
+def test_an_undeclared_text_base_reads_as_undeclared(tmp_path: Path):
+    bible = Bible(meta=BibleMeta(code="BLIVRE", name="Bíblia Livre", license="public-domain",
+                                 scope="full", source="getbible"), books=_bible().books)
+    assert "Base textual do Novo Testamento: **não declarada**." in _folder_note(tmp_path, bible)
+
+
+def test_the_classification_section_carries_both_rubric_tables(tmp_path: Path):
+    note = _folder_note(tmp_path)
+    assert "## Classificação" in note
+    assert "### Confiança quanto aos originais — 65%" in note
+    assert "### Aceitação — 50%" in note
+    for factor in ("Origem direta", "Base manuscrita", "Comissão", "Transparência"):
+        assert f"| {factor} |" in note
+    for factor in ("Púlpito", "Seminário", "Literatura", "Transversalidade"):
+        assert f"| {factor} |" in note
+
+
+def test_the_rubric_prose_is_rendered(tmp_path: Path):
+    note = _folder_note(tmp_path)
+    assert catalog.get("KJA").trust.note in note
+    assert catalog.get("KJA").respect.note in note
+
+
+def test_the_caveat_footer_separates_judgement_from_measurement(tmp_path: Path):
+    """A única defesa contra o número editorial ser lido como medição."""
+    assert (
+        "<sub>Confiança e aceitação são avaliações editoriais deste repositório, somadas "
+        "de quatro fatores de 25 pontos cada, e não medições — a rubrica está em "
+        "`src/catalog.py`. Integridade e legibilidade são calculadas a partir do texto "
+        "canônico por `uv run biblias validate`.</sub>"
+    ) in _folder_note(tmp_path)
+
+
+def test_the_text_measures_subsection_renders_the_computed_parts(tmp_path: Path):
+    note = _folder_note(tmp_path, metrics=_METRICS)
+    assert "### Medidas do texto" in note
+    assert "| Integridade | 97% |" in note
+    assert "| Capítulos presentes | 1189 de 1189 |" in note
+    assert "| Achados graves | 12 |" in note
+    assert "| Achados leves | 340 |" in note
+    assert "| Legibilidade | 54% |" in note
+    assert "| Palavras por frase | 21,4 |" in note
+    assert "| Sílabas por palavra | 2,31 |" in note
+
+
+def test_the_text_measures_subsection_is_absent_without_metrics(tmp_path: Path):
+    note = _folder_note(tmp_path)
+    assert "### Medidas do texto" not in note
+    assert "### Confiança quanto aos originais — 65%" in note
+
+
+def test_metrics_for_another_version_do_not_leak_into_this_note(tmp_path: Path):
+    assert "### Medidas do texto" not in _folder_note(tmp_path, metrics={"ARA": _METRICS["KJA"]})
+
+
+def test_a_version_outside_the_catalog_still_exports(tmp_path: Path):
+    """Um `BibleMeta` sintético não pode derrubar a build por não estar no catálogo."""
+    bible = Bible(meta=BibleMeta(code="ZZZ", name="Sintética", license="copyright",
+                                 scope="full", source="t"), books=_bible().books)
+    note = _folder_note(tmp_path, bible)
+    assert "## Classificação" not in note
+    assert 'code: "ZZZ"' in note
+    assert "text_base:" in note
+
+
+def test_the_book_table_follows_the_classification(tmp_path: Path):
+    note = _folder_note(tmp_path)
+    assert note.index("## Classificação") < note.index("| # | Código | Livro | Abreviação |")

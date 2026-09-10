@@ -4,6 +4,7 @@ import typer
 
 import canon
 import corrections
+import metrics as metrics_mod
 import validate as validate_mod
 import worklist
 from validate import Report
@@ -16,6 +17,7 @@ SQL_DIR = Path("inst/sql")
 CANON_DIR = Path("data/canonical")
 CORRECTIONS_DIR = Path("data/corrections")
 WORKLIST_DIR = Path("data/worklist")
+METRICS_PATH = Path("data/stats/metrics.json")
 
 
 def canonical_codes() -> list[str]:
@@ -123,9 +125,15 @@ def diff_sources(code: str, sources: str = "bolls,getbible") -> None:
 def validate(
     code: str | None = typer.Argument(None, help="Versão, lista separada por vírgula, ou `all`."),
 ) -> None:
-    """Valida o canônico e grava worklists por versão.
+    """Valida o canônico, grava as worklists por versão e recalcula as métricas.
 
     Sem argumento (ou com `all`), valida todas as versões do canônico.
+
+    Integridade e legibilidade saem daqui, e não de um comando próprio, porque este é o
+    único lugar que já carrega o corpus inteiro (a comparação entre versões exige isso)
+    e já tem em mãos os achados de que a integridade é função. Um comando `metrics`
+    separado repetiria a carga das dezoito versões, que é a parte cara, para recomputar
+    o mesmo relatório.
     """
     reported = set(resolve_codes(code))
     # The cross-version pass compares each verse against the other versions, so it needs
@@ -133,6 +141,7 @@ def validate(
     # worklists poorer than a full run.
     corpus = [canon.load_bible(c, CANON_DIR) for c in canonical_codes()]
     cross = validate_mod.cross_version_findings(corpus)
+    computed: dict[str, metrics_mod.VersionMetrics] = {}
     for bible in corpus:
         if bible.meta.code not in reported:
             continue
@@ -140,6 +149,9 @@ def validate(
         merged = Report(code=bible.meta.code,
                         findings=single.findings + cross.get(bible.meta.code, []))
         worklist.write_worklist(merged, WORKLIST_DIR)
+        computed[bible.meta.code] = metrics_mod.compute(bible, merged.findings)
         c = merged.counts
         typer.echo(f"{bible.meta.code}: {c[validate_mod.Tier.HIGH]} alta, "
                    f"{c[validate_mod.Tier.LOW]} baixa, {c[validate_mod.Tier.INFO]} info")
+    metrics_mod.write_metrics(computed, METRICS_PATH)
+    typer.echo(f"métricas gravadas em {METRICS_PATH}.")

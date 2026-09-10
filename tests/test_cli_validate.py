@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -69,3 +70,40 @@ def test_subset_worklist_matches_a_full_run(tmp_path: Path, monkeypatch):
 
     assert (subset_dir / "KJA.md").read_bytes() == (full_dir / "KJA.md").read_bytes()
     assert "high (1)" in (subset_dir / "KJA.md").read_text(encoding="utf-8")
+
+
+def test_validate_writes_metrics(tmp_path: Path, monkeypatch):
+    """As métricas saem da mesma passada que já carrega o corpus e já roda o validador."""
+    canon_dir = tmp_path / "canonical"
+    metrics_path = tmp_path / "stats" / "metrics.json"
+    full = "As mãos preguiçosas empobrecem o ser humano, porém as laboriosas enriquecem."
+    _save("A", full, canon_dir)
+    _save("B", full, canon_dir)
+    _save("KJA", "As mãos preguiçosas lhe", canon_dir)
+    monkeypatch.setattr(cli, "CANON_DIR", canon_dir)
+    monkeypatch.setattr(cli, "WORKLIST_DIR", tmp_path / "worklist")
+    monkeypatch.setattr(cli, "METRICS_PATH", metrics_path)
+
+    result = runner.invoke(cli.app, ["validate"])
+    assert result.exit_code == 0
+    data = json.loads(metrics_path.read_text(encoding="utf-8"))
+    assert set(data) == {"A", "B", "KJA"}
+    assert data["KJA"]["high"] == 1
+    assert 0 <= data["A"]["readability"] <= 100
+
+
+def test_validating_a_subset_keeps_the_metrics_of_the_others(tmp_path: Path, monkeypatch):
+    canon_dir = tmp_path / "canonical"
+    metrics_path = tmp_path / "stats" / "metrics.json"
+    full = "As mãos preguiçosas empobrecem o ser humano, porém as laboriosas enriquecem."
+    _save("A", full, canon_dir)
+    _save("B", full, canon_dir)
+    _save("KJA", full, canon_dir)
+    monkeypatch.setattr(cli, "CANON_DIR", canon_dir)
+    monkeypatch.setattr(cli, "WORKLIST_DIR", tmp_path / "worklist")
+    monkeypatch.setattr(cli, "METRICS_PATH", metrics_path)
+
+    runner.invoke(cli.app, ["validate"])
+    result = runner.invoke(cli.app, ["validate", "A"])
+    assert result.exit_code == 0
+    assert set(json.loads(metrics_path.read_text(encoding="utf-8"))) == {"A", "B", "KJA"}

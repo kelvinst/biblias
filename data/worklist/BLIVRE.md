@@ -2,7 +2,7 @@
 
 ## high (0)
 
-## low (986)
+## low (984)
 - GEN 1:17 — missing terminal punctuation
 - GEN 2:4 — missing terminal punctuation
 - GEN 6:1 — missing terminal punctuation
@@ -977,8 +977,6 @@
 - PHM 1:8 — missing terminal punctuation
 - PHM 1:11 — missing terminal punctuation
 - PHM 1:23 — missing terminal punctuation
-- HEB 2:7 — missing terminal punctuation
-- 1PE 5:14 — missing terminal punctuation
 - 2PE 3:3 — missing terminal punctuation
 - 1JN 1:1 — missing terminal punctuation
 - JUD 1:22 — missing terminal punctuation
@@ -1288,7 +1286,7 @@
 - ACT 8:37 — much shorter — likely intentional omission
 - ACT 15:18 — shorter but complete — critical-text/versification (31 vs median 64 chars)
 - ACT 15:34 — much shorter — likely intentional omission
-- ACT 24:2 — shorter but complete — critical-text/versification (54 vs median 186 chars)
+- ACT 24:2 — shorter but complete — critical-text/versification (53 vs median 186 chars)
 - ACT 24:7 — much shorter — likely intentional omission
 - ACT 28:29 — much shorter — likely intentional omission
 - ROM 16:24 — much shorter — likely intentional omission

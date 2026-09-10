@@ -25,7 +25,11 @@ def test_fetch_respects_nt_scope(monkeypatch):
     import sources.bolls as bolls_mod
     monkeypatch.setattr(
         catalog, "get",
-        lambda code: catalog.CatalogEntry(code, code, None, None, "copyright", "nt"),
+        lambda code: catalog.CatalogEntry(
+            code, code, None, None, "copyright", "nt", "critical", 80,
+            catalog.Assessment((1, 1, 1, 1), "teste"),
+            catalog.Assessment((1, 1, 1, 1), "teste"),
+        ),
     )
     monkeypatch.setitem(bolls_mod._SLUGS, "NTONLY", "NTONLY")
     bible = _source().fetch("NTONLY")

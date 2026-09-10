@@ -2,7 +2,7 @@
 
 ## high (0)
 
-## low (309)
+## low (308)
 - GEN 10:26 — missing terminal punctuation
 - GEN 10:27 — missing terminal punctuation
 - GEN 10:28 — missing terminal punctuation
@@ -287,7 +287,6 @@
 - PSA 136:16 — missing terminal punctuation
 - PSA 136:17 — missing terminal punctuation
 - PSA 136:18 — missing terminal punctuation
-- PSA 136:20 — missing terminal punctuation
 - PSA 136:22 — missing terminal punctuation
 - PSA 136:23 — missing terminal punctuation
 - PSA 136:24 — missing terminal punctuation
@@ -313,7 +312,7 @@
 - REV 9:11 — missing terminal punctuation
 - REV 16:16 — missing terminal punctuation
 
-## info (1698)
+## info (1697)
 - GEN 1:17 — verse continues in next (grouping/split)
 - GEN 2:4 — verse continues in next (grouping/split)
 - GEN 2:15 — verse continues in next (grouping/split)
@@ -1170,7 +1169,6 @@
 - PSA 136:7 — verse continues in next (grouping/split)
 - PSA 136:8 — verse continues in next (grouping/split)
 - PSA 136:14 — verse continues in next (grouping/split)
-- PSA 136:19 — verse continues in next (grouping/split)
 - PSA 136:21 — verse continues in next (grouping/split)
 - PSA 139:9 — verse continues in next (grouping/split)
 - PSA 139:11 — verse continues in next (grouping/split)

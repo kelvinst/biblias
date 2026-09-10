@@ -2203,4 +2203,4 @@
 - LUK 9:56 — shorter but complete — critical-text/versification (26 vs median 83 chars)
 - LUK 20:30 — much shorter — continues in next verse (versification split) (9 vs median 53 chars)
 - ROM 5:4 — much shorter — continues in next verse (versification split) (27 vs median 59 chars)
-- PHM 1:10 — much shorter — continues in next verse (versification split) (30 vs median 70 chars)
+- PHM 1:10 — much shorter — continues in next verse (versification split) (30 vs median 69 chars)
