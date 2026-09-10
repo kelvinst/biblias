@@ -3,7 +3,7 @@
 ## high (1)
 - MAT 26:25 — corruption (leaked marker / placeholder)
 
-## low (335)
+## low (327)
 - GEN 3:20 — missing terminal punctuation
 - GEN 4:1 — missing terminal punctuation
 - GEN 10:26 — missing terminal punctuation
@@ -29,7 +29,7 @@
 - LEV 16:6 — missing terminal punctuation
 - LEV 20:4 — missing terminal punctuation
 - LEV 26:27 — missing terminal punctuation
-- NUM 24:22 — missing terminal punctuation
+- NUM 24:19 — missing terminal punctuation
 - NUM 32:34 — missing terminal punctuation
 - NUM 32:35 — missing terminal punctuation
 - DEU 6:22 — missing terminal punctuation
@@ -260,14 +260,9 @@
 - EST 9:7 — missing terminal punctuation
 - EST 9:8 — missing terminal punctuation
 - JOB 31:5 — missing terminal punctuation
-- PSA 18:36 — missing terminal punctuation
-- PSA 78:1 — missing terminal punctuation
 - PSA 83:6 — missing terminal punctuation
 - PSA 96:7 — missing terminal punctuation
-- PSA 111:1 — missing terminal punctuation
-- PSA 111:2 — missing terminal punctuation
 - PSA 114:1 — missing terminal punctuation
-- PRO 26:13 — missing terminal punctuation
 - ISA 2:18 — missing terminal punctuation
 - ISA 4:4 — missing terminal punctuation
 - ISA 10:10 — missing terminal punctuation
@@ -297,7 +292,6 @@
 - MAT 12:8 — missing terminal punctuation
 - MAT 12:45 — missing terminal punctuation
 - MAT 13:9 — missing terminal punctuation
-- MAT 20:19 — missing terminal punctuation
 - MAT 21:27 — missing terminal punctuation
 - MRK 2:10 — missing terminal punctuation
 - MRK 8:21 — missing terminal punctuation
@@ -305,7 +299,6 @@
 - LUK 2:27 — missing terminal punctuation
 - LUK 3:1 — missing terminal punctuation
 - LUK 3:19 — missing terminal punctuation
-- LUK 8:25 — missing terminal punctuation
 - LUK 13:21 — missing terminal punctuation
 - LUK 16:13 — missing terminal punctuation
 - LUK 17:10 — missing terminal punctuation
@@ -314,7 +307,6 @@
 - LUK 19:45 — missing terminal punctuation
 - LUK 19:46 — missing terminal punctuation
 - LUK 22:34 — missing terminal punctuation
-- LUK 24:49 — missing terminal punctuation
 - JHN 3:21 — missing terminal punctuation
 - JHN 4:26 — missing terminal punctuation
 - JHN 4:38 — missing terminal punctuation
@@ -340,9 +332,8 @@
 - REV 3:13 — missing terminal punctuation
 - REV 11:16 — missing terminal punctuation
 
-## info (1852)
+## info (1829)
 - GEN 1:17 — verse continues in next (grouping/split)
-- GEN 4:15 — verse continues in next (grouping/split)
 - GEN 6:1 — verse continues in next (grouping/split)
 - GEN 7:8 — verse continues in next (grouping/split)
 - GEN 8:3 — verse continues in next (grouping/split)
@@ -1299,6 +1290,7 @@
 - PSA 105:26 — verse continues in next (grouping/split)
 - PSA 105:34 — verse continues in next (grouping/split)
 - PSA 105:44 — verse continues in next (grouping/split)
+- PSA 106:4 — verse continues in next (grouping/split)
 - PSA 106:21 — verse continues in next (grouping/split)
 - PSA 106:24 — verse continues in next (grouping/split)
 - PSA 106:26 — verse continues in next (grouping/split)
@@ -2056,7 +2048,6 @@
 - REV 19:17 — verse continues in next (grouping/split)
 - REV 20:7 — verse continues in next (grouping/split)
 - REV 22:1 — verse continues in next (grouping/split)
-- GEN 4:15 — much shorter — continues in next verse (versification split) (71 vs median 177 chars)
 - GEN 5:1 — shorter but complete — critical-text/versification (42 vs median 98 chars)
 - GEN 6:9 — shorter but complete — critical-text/versification (22 vs median 102 chars)
 - GEN 17:25 — shorter but complete — critical-text/versification (36 vs median 85 chars)
@@ -2065,7 +2056,6 @@
 - GEN 43:29 — shorter but complete — critical-text/versification (83 vs median 183 chars)
 - GEN 46:1 — shorter but complete — critical-text/versification (37 vs median 107 chars)
 - EXO 15:9 — shorter but complete — critical-text/versification (20 vs median 149 chars)
-- EXO 15:16 — shorter but complete — critical-text/versification (36 vs median 164 chars)
 - EXO 15:21 — shorter but complete — critical-text/versification (34 vs median 119 chars)
 - EXO 34:6 — much shorter — continues in next verse (versification split) (55 vs median 150 chars)
 - EXO 34:7 — shorter but complete — critical-text/versification (93 vs median 238 chars)
@@ -2091,32 +2081,22 @@
 - NUM 23:7 — shorter but complete — critical-text/versification (60 vs median 176 chars)
 - NUM 23:10 — shorter but complete — critical-text/versification (33 vs median 133 chars)
 - NUM 24:3 — much shorter — continues in next verse (versification split) (48 vs median 104 chars)
-- NUM 24:8 — shorter but complete — critical-text/versification (46 vs median 162 chars)
-- NUM 24:17 — shorter but complete — critical-text/versification (23 vs median 190 chars)
-- NUM 24:18 — shorter but complete — critical-text/versification (44 vs median 101 chars)
 - NUM 24:21 — shorter but complete — critical-text/versification (39 vs median 111 chars)
 - NUM 26:5 — much shorter — continues in next verse (versification split) (60 vs median 121 chars)
 - NUM 26:12 — much shorter — continues in next verse (versification split) (60 vs median 155 chars)
 - NUM 26:13 — shorter but complete — critical-text/versification (23 vs median 65 chars)
 - NUM 26:15 — much shorter — continues in next verse (versification split) (56 vs median 143 chars)
-- NUM 26:16 — much shorter — continues in next verse (versification split) (22 vs median 61 chars)
-- NUM 26:17 — shorter but complete — critical-text/versification (24 vs median 67 chars)
 - NUM 26:20 — shorter but complete — critical-text/versification (71 vs median 157 chars)
 - NUM 26:21 — shorter but complete — critical-text/versification (31 vs median 99 chars)
-- NUM 26:24 — shorter but complete — critical-text/versification (26 vs median 72 chars)
 - NUM 26:26 — shorter but complete — critical-text/versification (70 vs median 157 chars)
 - NUM 26:29 — shorter but complete — critical-text/versification (22 vs median 129 chars)
 - NUM 26:30 — much shorter — continues in next verse (versification split) (39 vs median 104 chars)
-- NUM 26:31 — much shorter — continues in next verse (versification split) (27 vs median 73 chars)
-- NUM 26:32 — shorter but complete — critical-text/versification (27 vs median 73 chars)
 - NUM 26:35 — shorter but complete — critical-text/versification (69 vs median 162 chars)
 - NUM 26:37 — shorter but complete — critical-text/versification (62 vs median 155 chars)
 - NUM 26:38 — shorter but complete — critical-text/versification (71 vs median 151 chars)
-- NUM 26:39 — shorter but complete — critical-text/versification (29 vs median 67 chars)
 - NUM 26:42 — much shorter — continues in next verse (versification split) (65 vs median 139 chars)
 - NUM 26:44 — much shorter — continues in next verse (versification split) (67 vs median 145 chars)
 - NUM 26:45 — shorter but complete — critical-text/versification (23 vs median 102 chars)
-- NUM 26:49 — shorter but complete — critical-text/versification (25 vs median 69 chars)
 - NUM 26:57 — shorter but complete — critical-text/versification (66 vs median 176 chars)
 - NUM 26:58 — much shorter — continues in next verse (versification split) (52 vs median 171 chars)
 - NUM 31:35 — shorter but complete — critical-text/versification (34 vs median 100 chars)
@@ -2136,10 +2116,6 @@
 - JOS 21:28 — much shorter — list/continuation (39 vs median 79 chars)
 - JOS 21:36 — much shorter — list/continuation (31 vs median 74 chars)
 - JDG 15:16 — shorter but complete — critical-text/versification (13 vs median 117 chars)
-- RUT 4:19 — shorter but complete — critical-text/versification (17 vs median 42 chars)
-- RUT 4:20 — shorter but complete — critical-text/versification (24 vs median 50 chars)
-- RUT 4:21 — shorter but complete — critical-text/versification (18 vs median 40 chars)
-- RUT 4:22 — shorter but complete — critical-text/versification (18 vs median 42 chars)
 - 1SA 2:1 — shorter but complete — critical-text/versification (31 vs median 173 chars)
 - 1SA 4:1 — shorter but complete — critical-text/versification (69 vs median 165 chars)
 - 2KI 13:17 — shorter but complete — critical-text/versification (83 vs median 233 chars)
@@ -2172,13 +2148,7 @@
 - JOB 21:24 — shorter but complete — critical-text/versification (28 vs median 67 chars)
 - PSA 35:10 — shorter but complete — critical-text/versification (80 vs median 161 chars)
 - PSA 55:19 — shorter but complete — critical-text/versification (55 vs median 135 chars)
-- PSA 111:1 — much shorter — list/continuation (47 vs median 98 chars)
-- PSA 111:2 — much shorter — list/continuation (35 vs median 79 chars)
-- PSA 111:4 — shorter but complete — critical-text/versification (38 vs median 77 chars)
-- PSA 111:5 — shorter but complete — critical-text/versification (33 vs median 67 chars)
-- PSA 111:10 — shorter but complete — critical-text/versification (45 vs median 135 chars)
 - PSA 112:8 — shorter but complete — critical-text/versification (38 vs median 96 chars)
-- PSA 112:9 — shorter but complete — critical-text/versification (49 vs median 106 chars)
 - PSA 146:1 — shorter but complete — critical-text/versification (8 vs median 46 chars)
 - PRO 10:1 — shorter but complete — critical-text/versification (22 vs median 97 chars)
 - SNG 1:4 — shorter but complete — critical-text/versification (84 vs median 191 chars)
@@ -2190,6 +2160,5 @@
 - ISA 54:2 — shorter but complete — critical-text/versification (69 vs median 139 chars)
 - JER 2:31 — shorter but complete — critical-text/versification (80 vs median 210 chars)
 - HAB 3:9 — shorter but complete — critical-text/versification (46 vs median 105 chars)
-- JHN 1:35 — much shorter — continues in next verse (versification split) (16 vs median 71 chars)
 - JHN 21:20 — shorter but complete — critical-text/versification (73 vs median 174 chars)
 - 1CO 12:31 — shorter but complete — critical-text/versification (42 vs median 104 chars)

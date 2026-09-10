@@ -17,7 +17,7 @@
 - **Zefania XML**: formato padrão, importado por Quelea, MyBible, And Bible, OpenLP e outros.
 - **SQLite**: banco no esquema do [OpenLP](https://openlp.org/) (outros programas usam esquemas SQLite diferentes).
 - **JSON**: formato aberto, para qualquer outro uso.
-- **Markdown**: um arquivo por capítulo, em uma pasta por livro (`ACF/1-OT-Law/ACF-01-GEN/ACF-01-GEN-001.md`), com um versículo por linha e identificador de bloco (`^acf-gen-1-1`) para linkar versículo a versículo no Obsidian e afins. Ao lado deles, uma nota de pasta por versão (`ACF/ACF.md`) guarda o que os nomes dos arquivos não cabem: título completo, ano, editora, licença, escopo e fonte como propriedades, e a tabela dos livros com a abreviação de cada um. Nada além disso: índice de livro e links para o capítulo anterior e o próximo são navegação, e um plugin do Obsidian monta isso a partir dos nomes dos arquivos.
+- **Markdown**: um arquivo por capítulo, em uma pasta por livro (`ACF/1-OT-Law/ACF-01-GEN/ACF-01-GEN-001.md`), com um versículo por linha e identificador de bloco (`^acf-gen-1-1`) para linkar versículo a versículo no Obsidian e afins. Ao lado deles, uma nota de pasta por versão (`ACF/ACF.md`) guarda o que os nomes dos arquivos não cabem. São catorze propriedades: título completo, ano, editora, licença, escopo e fonte; a base textual do Novo Testamento (`text_base`) e o método de tradução (`method`, faixa de `formality_pct`); e quatro percentuais inteiros — `trust_pct`, `respect_pct`, `integrity_pct` e `readability_pct` — números crus, sem `%`, para que uma query do Dataview possa ordenar e comparar. No corpo, uma seção **Classificação** abre as duas rubricas fator a fator com a prosa que as fundamenta, mostra as medidas calculadas com as parcelas que as produziram, e traz a ressalva que separa as duas coisas: confiança e aceitação são avaliação editorial deste repositório, integridade e legibilidade são calculadas do texto canônico. Depois, a tabela dos livros com a abreviação de cada um. Nada além disso: índice de livro e links para o capítulo anterior e o próximo são navegação, e um plugin do Obsidian monta isso a partir dos nomes dos arquivos.
 
 <table>
   <tr>
@@ -62,7 +62,7 @@ Toolkit em Python (com [uv](https://docs.astral.sh/uv/)). Os formatos saem do ca
 ```bash
 uv sync
 uv run biblias fetch KJA --source bolls   # fonte → canônico
-uv run biblias validate                   # valida e gera as worklists (todas as versões)
+uv run biblias validate                   # valida, gera as worklists e recalcula data/stats/metrics.json
 uv run biblias validate ACF,ARA           # valida só as versões da lista
 uv run biblias diff-sources NTLH          # compara fontes
 uv run biblias build KJA --format zefania,sqlite,json,markdown --out dist
@@ -71,6 +71,8 @@ uv run biblias build all --out dist       # todas as versões do canônico (igua
 ```
 
 Fontes: `openlp` (SQLite local), `bolls`, `getbible`.
+
+A classificação editorial de cada versão (base textual, formalidade, confiança e aceitação) é escrita à mão em [`src/catalog.py`](src/catalog.py), onde a rubrica dos quatro fatores está documentada junto dos campos. Já integridade e legibilidade são calculadas do texto canônico pelo `validate` e gravadas em [`data/stats/metrics.json`](data/stats/metrics.json) — não se editam à mão: um número calculado escrito à mão apodrece em silêncio na primeira correção de versículo.
 
 ## Contribuindo
 

@@ -3,6 +3,7 @@ import statistics
 from dataclasses import dataclass
 from enum import Enum
 
+import catalog
 from model import Bible
 
 _TERMINAL = ('.', '!', '?', '"', '”', '’', '»', ')', ']', ':', ';', '…', '—', '*')
@@ -11,8 +12,10 @@ _FUSE = re.compile(r"[A-Za-zÀ-ÿ]\d|\d[A-Za-zÀ-ÿ]")  # footnote marker fused 
 _JUNK = ("verszeile", "ohne text")                  # foreign placeholders leaked by legacy tooling
 _DASHES = set("—–- ")
 
-# Paraphrases don't track formal verse boundaries; cross-version length comparison is invalid for them.
-_PARAPHRASE = frozenset({"OL", "MENS"})
+# Paraphrases don't track formal verse boundaries; cross-version length comparison is
+# invalid for them. Derived from the catalog, where the method is already declared:
+# the same fact written in two places drifts the first time one of them is edited.
+_PARAPHRASE = catalog.paraphrase_codes()
 
 
 class Tier(str, Enum):

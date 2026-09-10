@@ -1,3 +1,5 @@
+import catalog
+import validate
 from model import Bible, BibleMeta, Book, Chapter, Verse
 from validate import Tier, cross_version_findings, validate_bible
 
@@ -99,3 +101,9 @@ def test_cross_genuine_truncation_is_high():
 
 def test_paraphrase_excluded_from_cross_version():
     assert _cross_tier("frase curta", short_code="OL") is None
+
+
+def test_paraphrases_are_derived_from_the_catalog():
+    """A mesma informação declarada em dois lugares diverge; o catálogo é o lugar certo."""
+    assert validate._PARAPHRASE == {"OL", "MENS"}
+    assert validate._PARAPHRASE == catalog.paraphrase_codes()

@@ -2570,7 +2570,7 @@
 - JOS 21:36 — much shorter — list/continuation (31 vs median 74 chars)
 - JDG 11:5 — shorter but complete — critical-text/versification (49 vs median 107 chars)
 - 1SA 20:38 — much shorter — continues in next verse (versification split) (60 vs median 120 chars)
-- 2SA 6:4 — shorter but complete — critical-text/versification (47 vs median 98 chars)
+- 2SA 6:4 — shorter but complete — critical-text/versification (46 vs median 98 chars)
 - 1CH 6:26 — much shorter — continues in next verse (versification split) (37 vs median 74 chars)
 - 1CH 6:58 — much shorter — list/continuation (13 vs median 47 chars)
 - 1CH 6:67 — much shorter — list/continuation (56 vs median 120 chars)
