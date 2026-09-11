@@ -154,7 +154,9 @@ def validate(
         c = merged.counts
         typer.echo(f"{bible.meta.code}: {c[validate_mod.Tier.HIGH]} alta, "
                    f"{c[validate_mod.Tier.LOW]} baixa, {c[validate_mod.Tier.INFO]} info")
-    # `present` poda do arquivo as versões que saíram do canônico; sem isso a linha de
-    # uma versão renomeada fica lá para sempre.
-    metrics_mod.write_metrics(computed, METRICS_PATH, known=set(present))
+    # Poda do arquivo as versões que saíram do canônico; sem isso a linha de uma versão
+    # renomeada fica lá para sempre. As pastas pela metade entram no conjunto vivo: um
+    # `fetch` interrompido não pode apagar a métrica de uma versão que ainda está aqui.
+    metrics_mod.write_metrics(computed, METRICS_PATH,
+                              known=set(present) | set(incomplete_codes()))
     typer.echo(f"métricas gravadas em {METRICS_PATH}.")

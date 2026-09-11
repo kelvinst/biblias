@@ -52,10 +52,11 @@ def count_syllables(word: str) -> int:
     total = 0
     for match in re.finditer(f"[{_VOWELS}]+", low):
         group = match.group()
-        # "Posição final" é a última sílaba, não a última letra: consoante depois do
-        # grupo não desfaz o ditongo, senão `his-tó-rias` sairia com uma sílaba a mais
-        # que `his-tó-ria`. Já `di-an-te` traz o mesmo par com vogal adiante, e é hiato.
-        word_final = not re.search(f"[{_VOWELS}]", low[match.end():])
+        # "Posição final" tolera o s do plural e nada mais: sem ele `his-tó-rias` sairia
+        # com uma sílaba a mais que `his-tó-ria`; com qualquer consoante o par voltaria a
+        # ser ditongo em `cri-am` e `es-ta-ri-am`, que são hiato. `di-an-te` traz o mesmo
+        # par com vogal adiante, e também é hiato.
+        word_final = low[match.end():] in ("", "s")
         i = 0
         while i < len(group):
             pair = _strip_accent(group[i]) + group[i + 1] if i + 1 < len(group) else ""
