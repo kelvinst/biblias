@@ -222,8 +222,11 @@ class MarkdownExporter:
     the previous layout sitting beside the new one.
     """
 
-    def __init__(self, metrics_path: Path = DEFAULT_METRICS_PATH):
-        self._metrics = metrics_mod.load_metrics(metrics_path)
+    def __init__(self, metrics_path: Path | None = None):
+        # Resolvido aqui, e não como valor default do parâmetro: ali o caminho ficaria
+        # preso na definição da classe, imune a quem reaponte a constante — foi assim
+        # que os testes acabaram lendo o `metrics.json` versionado do repositório.
+        self._metrics = metrics_mod.load_metrics(metrics_path or DEFAULT_METRICS_PATH)
 
     def export(self, bible: Bible, path: Path) -> None:
         # Rebuild from scratch: every rename of the layout used to leave the old

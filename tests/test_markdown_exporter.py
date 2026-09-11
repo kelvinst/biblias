@@ -575,3 +575,14 @@ def test_an_unknown_text_base_degrades_instead_of_raising(tmp_path: Path, monkey
                              entry.trust, entry.respect),
     )
     assert "Base textual do Novo Testamento: **não declarada**." in _folder_note(tmp_path)
+
+
+def test_the_default_metrics_path_is_read_at_construction_not_at_definition(tmp_path: Path, monkeypatch):
+    """Preso como valor default do `__init__`, o caminho ficava imune a monkeypatch e os
+    testes liam o `metrics.json` versionado do repositório."""
+    path = tmp_path / "patched.json"
+    path.write_text(json.dumps({"KJA": _METRICS["KJA"]}), encoding="utf-8")
+    monkeypatch.setattr("exporters.markdown.DEFAULT_METRICS_PATH", path)
+    out = tmp_path / "KJA"
+    MarkdownExporter().export(_bible(), out)
+    assert "| Integridade | 97% |" in (out / "KJA.md").read_text(encoding="utf-8")
