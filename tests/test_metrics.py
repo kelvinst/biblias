@@ -207,3 +207,11 @@ def test_load_metrics_of_a_file_that_is_not_an_object_is_empty(tmp_path: Path):
     path = tmp_path / "metrics.json"
     path.write_text('["A", "B"]', encoding="utf-8")
     assert metrics.load_metrics(path) == {}
+
+
+def test_load_metrics_drops_a_row_that_is_not_an_object(tmp_path: Path):
+    """Linha fora de formato cai no mesmo caminho da versão ausente; sem isso ela só
+    estoura no exportador, com a pasta de destino já apagada."""
+    path = tmp_path / "metrics.json"
+    path.write_text('{"KJA": 97, "ARA": {"integrity": 99}}', encoding="utf-8")
+    assert metrics.load_metrics(path) == {"ARA": {"integrity": 99}}

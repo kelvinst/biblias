@@ -212,5 +212,8 @@ def load_metrics(path: Path) -> dict[str, dict]:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
-    # Um JSON válido que não seja objeto estouraria só lá adiante, no exportador.
-    return data if isinstance(data, dict) else {}
+    # Um JSON válido que não seja objeto — ou uma linha que não seja objeto — estouraria
+    # só lá adiante, no exportador, com a pasta de destino já apagada.
+    if not isinstance(data, dict):
+        return {}
+    return {code: row for code, row in data.items() if isinstance(row, dict)}
