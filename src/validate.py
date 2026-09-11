@@ -63,8 +63,12 @@ def validate_bible(bible: Bible) -> Report:
         # capítulo não entra aqui porque a completude da métrica de integridade já a
         # mede; excesso ela satura e esconde. Fica em 0:0 porque é do livro, não de um
         # versículo.
-        expected = versification.chapters_for(book.code)
-        if len(book.chapters) > expected:
+        expected = versification.CHAPTERS.get(book.code)
+        if expected is None:
+            # `Book.code` é string livre no modelo: código fora do cânon vira achado,
+            # que é o que esta função existe para produzir, e não KeyError.
+            findings.append(Finding(book.code, 0, 0, Tier.HIGH, "unknown book code"))
+        elif len(book.chapters) > expected:
             findings.append(Finding(book.code, 0, 0, Tier.HIGH,
                                     f"chapter count {len(book.chapters)}, canon expects {expected}"))
         for chapter in book.chapters:

@@ -9,7 +9,7 @@
     "info": 7,
     "readability": 82,
     "words_per_sentence": 14.47,
-    "syllables_per_word": 1.798
+    "syllables_per_word": 1.801
   },
   "ALM1911": {
     "integrity": 91,
@@ -21,7 +21,7 @@
     "info": 26,
     "readability": 80,
     "words_per_sentence": 16.76,
-    "syllables_per_word": 1.794
+    "syllables_per_word": 1.797
   },
   "ARA": {
     "integrity": 99,
@@ -33,7 +33,7 @@
     "info": 2078,
     "readability": 79,
     "words_per_sentence": 14.32,
-    "syllables_per_word": 1.832
+    "syllables_per_word": 1.835
   },
   "ARC": {
     "integrity": 100,
@@ -45,7 +45,7 @@
     "info": 1978,
     "readability": 82,
     "words_per_sentence": 14.76,
-    "syllables_per_word": 1.795
+    "syllables_per_word": 1.798
   },
   "AS21": {
     "integrity": 99,
@@ -55,9 +55,9 @@
     "high": 0,
     "low": 260,
     "info": 1863,
-    "readability": 78,
+    "readability": 77,
     "words_per_sentence": 13.88,
-    "syllables_per_word": 1.858
+    "syllables_per_word": 1.862
   },
   "BLIVRE": {
     "integrity": 97,
@@ -69,7 +69,7 @@
     "info": 301,
     "readability": 81,
     "words_per_sentence": 14.4,
-    "syllables_per_word": 1.809
+    "syllables_per_word": 1.813
   },
   "JFAA": {
     "integrity": 99,
@@ -81,7 +81,7 @@
     "info": 1786,
     "readability": 81,
     "words_per_sentence": 14.09,
-    "syllables_per_word": 1.815
+    "syllables_per_word": 1.818
   },
   "KJA": {
     "integrity": 99,
@@ -93,7 +93,7 @@
     "info": 1806,
     "readability": 69,
     "words_per_sentence": 15.69,
-    "syllables_per_word": 1.936
+    "syllables_per_word": 1.939
   },
   "KJF": {
     "integrity": 99,
@@ -105,7 +105,7 @@
     "info": 1291,
     "readability": 80,
     "words_per_sentence": 15.06,
-    "syllables_per_word": 1.816
+    "syllables_per_word": 1.819
   },
   "MENS": {
     "integrity": 100,
@@ -115,9 +115,9 @@
     "high": 0,
     "low": 55,
     "info": 11,
-    "readability": 72,
+    "readability": 71,
     "words_per_sentence": 13.09,
-    "syllables_per_word": 1.935
+    "syllables_per_word": 1.94
   },
   "NAA": {
     "integrity": 99,
@@ -129,7 +129,7 @@
     "info": 1934,
     "readability": 78,
     "words_per_sentence": 14.64,
-    "syllables_per_word": 1.84
+    "syllables_per_word": 1.843
   },
   "NBV": {
     "integrity": 99,
@@ -141,7 +141,7 @@
     "info": 1890,
     "readability": 74,
     "words_per_sentence": 14.34,
-    "syllables_per_word": 1.892
+    "syllables_per_word": 1.896
   },
   "NTLH": {
     "integrity": 99,
@@ -153,7 +153,7 @@
     "info": 1687,
     "readability": 78,
     "words_per_sentence": 13.88,
-    "syllables_per_word": 1.849
+    "syllables_per_word": 1.853
   },
   "NVI": {
     "integrity": 99,
@@ -165,7 +165,7 @@
     "info": 2351,
     "readability": 75,
     "words_per_sentence": 13.78,
-    "syllables_per_word": 1.885
+    "syllables_per_word": 1.889
   },
   "NVT": {
     "integrity": 99,
@@ -177,7 +177,7 @@
     "info": 1637,
     "readability": 73,
     "words_per_sentence": 13.14,
-    "syllables_per_word": 1.92
+    "syllables_per_word": 1.924
   },
   "OL": {
     "integrity": 99,
@@ -189,7 +189,7 @@
     "info": 1277,
     "readability": 75,
     "words_per_sentence": 14.05,
-    "syllables_per_word": 1.887
+    "syllables_per_word": 1.892
   },
   "TB": {
     "integrity": 99,
@@ -201,7 +201,7 @@
     "info": 1968,
     "readability": 79,
     "words_per_sentence": 14.4,
-    "syllables_per_word": 1.83
+    "syllables_per_word": 1.833
   },
   "VFL": {
     "integrity": 99,
@@ -213,6 +213,6 @@
     "info": 1472,
     "readability": 77,
     "words_per_sentence": 13.93,
-    "syllables_per_word": 1.861
+    "syllables_per_word": 1.865
   }
 }

@@ -141,3 +141,12 @@ def test_a_book_with_fewer_chapters_is_left_to_the_integrity_metric():
 def test_a_book_with_the_canonical_chapter_count_is_not_flagged():
     assert not [f for f in validate_bible(_with_books([_book("2SA", 24)])).findings
                 if "chapter count" in f.reason]
+
+
+def test_an_unknown_book_code_is_a_finding_not_a_crash():
+    """`Book.code` é string livre no modelo; o validador existe para relatar, não cair."""
+    report = validate_bible(_with_books([_book("PSALM", 1)]))
+    unknown = [f for f in report.findings if "unknown book code" in f.reason]
+    assert len(unknown) == 1
+    assert unknown[0].tier is Tier.HIGH
+    assert unknown[0].book_code == "PSALM"

@@ -107,3 +107,22 @@ def test_validating_a_subset_keeps_the_metrics_of_the_others(tmp_path: Path, mon
     result = runner.invoke(cli.app, ["validate", "A"])
     assert result.exit_code == 0
     assert set(json.loads(metrics_path.read_text(encoding="utf-8"))) == {"A", "B", "KJA"}
+
+
+def test_a_half_written_version_keeps_its_metrics(tmp_path: Path, monkeypatch):
+    """Um `fetch` interrompido deixa a pasta sem `meta.json`; a versão continua no
+    repositório, e validar outra não pode apagar a métrica dela."""
+    canon_dir = tmp_path / "canonical"
+    metrics_path = tmp_path / "stats" / "metrics.json"
+    full = "As mãos preguiçosas empobrecem o ser humano, porém as laboriosas enriquecem."
+    _save("A", full, canon_dir)
+    _save("B", full, canon_dir)
+    monkeypatch.setattr(cli, "CANON_DIR", canon_dir)
+    monkeypatch.setattr(cli, "WORKLIST_DIR", tmp_path / "worklist")
+    monkeypatch.setattr(cli, "METRICS_PATH", metrics_path)
+    runner.invoke(cli.app, ["validate"])
+
+    (canon_dir / "B" / "meta.json").unlink()
+    result = runner.invoke(cli.app, ["validate", "A"])
+    assert result.exit_code == 0
+    assert set(json.loads(metrics_path.read_text(encoding="utf-8"))) == {"A", "B"}

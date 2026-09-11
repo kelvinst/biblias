@@ -32,6 +32,9 @@ def _bible(verses: list[str], code: str = "X", scope: str = "full") -> Bible:
     ("país", 2),         # pa-ís
     ("história", 3),     # ditongo crescente final: his-tó-ria
     ("histórias", 3),    # o plural não acrescenta sílaba ao singular
+    ("criam", 2),        # consoante que não seja o s do plural desfaz: cri-am
+    ("estariam", 4),     # es-ta-ri-am
+    ("continuam", 4),    # con-ti-nu-am
     ("diante", 3),       # o mesmo par fora da posição final é hiato: di-an-te
     ("piano", 3),
     ("aqui", 2),         # o u de "qu" não forma sílaba
